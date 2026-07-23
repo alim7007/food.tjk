@@ -1,0 +1,113 @@
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--color-border);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.badgePrimary {
+  composes: badge;
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.badgeSuccess {
+  composes: badge;
+  background: var(--color-success);
+  color: #fff;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--color-border) 25%, #f5f5f4 50%, var(--color-border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--color-text-muted);
+}
+
+.emptyTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--color-text-secondary);
+}
+
+.error {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--color-error);
+  background: var(--color-primary-light);
+  border-radius: var(--radius);
+}
+
+.loadingWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.denied {
+  text-align: center;
+  padding: 48px 16px;
+}
+
+.deniedIcon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.deniedTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 6px;
+}
+
+.deniedText {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}

@@ -1,0 +1,43 @@
+.title { font-size: 24px; font-weight: 700; padding: 32px 0 16px; }
+.tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 2px solid var(--color-border); overflow-x: auto; }
+.tab { padding: 10px 20px; font-size: 14px; font-weight: 600; color: var(--color-text-secondary); border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+.tab:hover { color: var(--color-text); }
+.activeTab { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+.filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.filterBtn { padding: 6px 14px; border: 1px solid var(--color-border); border-radius: 20px; font-size: 13px; background: var(--color-surface); color: var(--color-text-secondary); }
+.activeFilter { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+.orderList { display: flex; flex-direction: column; gap: 12px; padding-bottom: 48px; }
+.orderCard { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 16px; }
+.orderHeader { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.orderRest { font-weight: 600; }
+.orderStatus { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px; text-transform: capitalize; }
+.pending { background: #fef3c7; color: #92400e; }
+.accepted { background: #dbeafe; color: #1e40af; }
+.delivered { background: #d1fae5; color: #065f46; }
+.orderInfo { display: flex; gap: 16px; font-size: 13px; color: var(--color-text-secondary); margin-bottom: 4px; flex-wrap: wrap; }
+.orderNote { font-size: 13px; color: var(--color-warning); background: #fff7ed; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; }
+.orderItems { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; margin-bottom: 8px; }
+.orderItems span { background: var(--color-bg); padding: 2px 8px; border-radius: 4px; }
+.orderTotal { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.courierInfo { font-size: 13px; color: var(--color-success); margin-bottom: 8px; }
+.orderActions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.actionBtn { padding: 8px 16px; background: var(--color-primary); color: #fff; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.actionBtn:hover { background: var(--color-primary-hover); }
+.dangerBtn { padding: 6px 12px; background: var(--color-error); color: #fff; border-radius: 6px; font-size: 12px; font-weight: 600; }
+.uploadBtn { padding: 8px 12px; border: 1px dashed var(--color-border); border-radius: var(--radius-sm); font-size: 12px; background: var(--color-bg); color: var(--color-text-secondary); white-space: nowrap; }
+.uploadBtn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.select { padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 13px; background: var(--color-surface); }
+.formRow { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.input { padding: 8px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 13px; outline: none; flex: 1; min-width: 120px; }
+.input:focus { border-color: var(--color-primary); }
+.restList { display: flex; flex-direction: column; gap: 12px; padding-bottom: 48px; }
+.restCard { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 16px; }
+.restHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.foodSection { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--color-border); }
+.foodRow { display: flex; align-items: center; gap: 12px; padding: 8px 0; font-size: 14px; border-bottom: 1px solid var(--color-border); }
+.foodRow span:last-of-type { font-weight: 600; margin-left: auto; }
+.courierList { display: flex; flex-direction: column; gap: 8px; padding-bottom: 48px; }
+.courierCard { display: flex; justify-content: space-between; padding: 12px 16px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); font-size: 14px; }
+.loading { text-align: center; padding: 48px; color: var(--color-text-muted); }
+.error { text-align: center; padding: 12px; color: var(--color-error); background: var(--color-primary-light); border-radius: var(--radius); margin-bottom: 16px; font-size: 14px; }
+@media (max-width: 600px) { .formRow { flex-direction: column; } .input { min-width: 100%; } }

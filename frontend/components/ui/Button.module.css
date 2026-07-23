@@ -1,0 +1,107 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  transition: background 0.15s, transform 0.1s;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primary {
+  composes: btn;
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.secondary {
+  composes: btn;
+  background: #fff;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--color-bg);
+}
+
+.ghost {
+  composes: btn;
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--color-bg);
+}
+
+.danger {
+  composes: btn;
+  background: var(--color-error);
+  color: #fff;
+}
+
+.danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.small {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.large {
+  padding: 14px 28px;
+  font-size: 16px;
+}
+
+.full {
+  width: 100%;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.5s linear infinite;
+  flex-shrink: 0;
+}
+
+.checkIcon {
+  font-size: 14px;
+  font-weight: 700;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.crossIcon {
+  font-size: 14px;
+  font-weight: 700;
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

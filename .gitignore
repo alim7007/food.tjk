@@ -1,0 +1,8 @@
+.env
+tmp/
+dist/
+*.log
+node_modules/
+.next/
+.DS_Store
+.opencode/

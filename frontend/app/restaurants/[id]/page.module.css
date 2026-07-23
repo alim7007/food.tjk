@@ -1,0 +1,43 @@
+.header { padding: 24px 0 16px; }
+.restImage { width: 100%; max-height: 240px; object-fit: cover; border-radius: var(--radius); margin-bottom: 16px; }
+.name { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+.desc { font-size: 14px; color: var(--color-text-secondary); }
+.success { background: var(--color-success-light); color: var(--color-success); padding: 16px; border-radius: var(--radius); margin-bottom: 16px; font-weight: 600; text-align: center; }
+.layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; padding-bottom: 48px; }
+.sectionTitle { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+.menu { min-width: 0; }
+.foodItem { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); margin-bottom: 8px; }
+.foodImage { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+.foodInfo { flex: 1; min-width: 0; }
+.foodName { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+.foodDesc { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.foodPrice { font-size: 14px; font-weight: 700; color: var(--color-primary); }
+.addBtn { width: 36px; height: 36px; background: var(--color-primary); color: #fff; border-radius: 50%; font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.addBtn:hover { background: var(--color-primary-hover); }
+.sidebar { position: sticky; top: 80px; align-self: start; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 20px; }
+.emptyBasket { color: var(--color-text-muted); font-size: 14px; text-align: center; padding: 24px 0; }
+.basketItems { margin-bottom: 16px; }
+.basketItem { padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.basketItem:last-child { border-bottom: none; }
+.basketItemInfo { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.basketItemName { font-size: 14px; font-weight: 500; }
+.basketItemPrice { font-size: 14px; font-weight: 600; }
+.basketItemQty { display: flex; align-items: center; gap: 8px; }
+.basketItemQty button { width: 28px; height: 28px; border: 1px solid var(--color-border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; background: var(--color-bg); }
+.basketItemQty span { font-size: 14px; font-weight: 600; min-width: 20px; text-align: center; }
+.removeBtn { margin-left: auto; color: var(--color-error); border-color: var(--color-error) !important; }
+.basketTotal { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; }
+.basketTotal:last-of-type { font-size: 16px; border-top: 1px solid var(--color-border); margin-top: 4px; padding-top: 8px; }
+.orderBtn { width: 100%; padding: 14px; background: var(--color-primary); color: #fff; border-radius: var(--radius); font-size: 15px; font-weight: 600; margin-top: 16px; }
+.orderBtn:hover { background: var(--color-primary-hover); }
+.orderBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.orderForm { margin-top: 16px; }
+.input, .textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 14px; margin-bottom: 4px; outline: none; font-family: inherit; }
+.input:focus, .textarea:focus { border-color: var(--color-primary); }
+.inputError { border-color: var(--color-error) !important; }
+.fieldError { color: var(--color-error); font-size: 12px; display: block; margin-bottom: 8px; }
+.cancelBtn { width: 100%; padding: 10px; color: var(--color-text-secondary); font-size: 14px; margin-top: 4px; }
+.loading { text-align: center; padding: 48px; color: var(--color-text-muted); }
+.error { text-align: center; padding: 32px; color: var(--color-error); background: var(--color-primary-light); border-radius: var(--radius); }
+.empty { text-align: center; padding: 32px; color: var(--color-text-muted); }
+@media (max-width: 768px) { .layout { grid-template-columns: 1fr; } .sidebar { position: static; } .foodImage { width: 48px; height: 48px; } }
