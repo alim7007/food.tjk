@@ -11,7 +11,8 @@ import styles from "./page.module.css";
 async function uploadImage(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
-  const res = await fetch("/api/v1/admin/upload", { method: "POST", credentials: "include", body: formData });
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
+  const res = await fetch(`${apiUrl}/admin/upload`, { method: "POST", credentials: "include", body: formData });
   const body = await res.json();
   if (!res.ok) throw new Error(body.error?.message || "Upload failed");
   return body.data.url;

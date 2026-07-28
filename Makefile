@@ -1,13 +1,23 @@
-.PHONY: up down restart logs migrate-up migrate-down seed test fmt lint reset-db
+.PHONY: up down restart logs migrate-up migrate-down seed test fmt lint reset-db update-backend update-frontend clean
 
 up:
 	docker compose up -d --build
 
 down:
+	docker compose down
+
+restart:
+	docker compose restart
+
+clean:
 	docker compose down -v --rmi all
 	docker image prune -f
 
-restart: down up
+update-backend:
+	docker compose up -d --no-deps --build backend
+
+update-frontend:
+	docker compose up -d --no-deps --build frontend
 
 logs:
 	docker compose logs -f
