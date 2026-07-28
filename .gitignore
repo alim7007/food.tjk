@@ -1,6 +1,8 @@
 .env
+.env.prod
 tmp/
 dist/
+out/
 *.log
 node_modules/
 .next/

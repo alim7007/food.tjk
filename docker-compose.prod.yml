@@ -1,0 +1,78 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER:-nexara}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-nexara_food}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-nexara} -d ${DB_NAME:-nexara_food}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    environment:
+      DATABASE_URL: postgres://${DB_USER:-nexara}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-nexara_food}?sslmode=disable
+      SERVER_PORT: "8080"
+      SERVER_READ_TIMEOUT: 15s
+      SERVER_WRITE_TIMEOUT: 15s
+      ALLOWED_ORIGINS: ${DOMAIN:-http://localhost}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRY_MINUTES: "${JWT_EXPIRY_MINUTES:-60}"
+      JWT_REFRESH_EXPIRY_DAYS: "${JWT_REFRESH_EXPIRY_DAYS:-7}"
+      BCRYPT_COST: "${BCRYPT_COST:-12}"
+      TZ: Asia/Dushanbe
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    environment:
+      NEXT_PUBLIC_API_URL: ${DOMAIN:-http://localhost}/api/v1
+    depends_on:
+      - backend
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 32M
+
+volumes:
+  pgdata:
+  uploads:

@@ -1,4 +1,4 @@
-.PHONY: up down restart logs migrate-up migrate-down seed test fmt lint reset-db update-backend update-frontend clean
+.PHONY: up down restart logs migrate-up migrate-down seed test fmt lint reset-db update-backend update-frontend clean up-prod down-prod update-prod-backend update-prod-frontend
 
 up:
 	docker compose up -d --build
@@ -18,6 +18,24 @@ update-backend:
 
 update-frontend:
 	docker compose up -d --no-deps --build frontend
+
+up-prod:
+	docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+
+down-prod:
+	docker compose -f docker-compose.prod.yml down
+
+update-prod-backend:
+	docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --no-deps --build backend
+
+update-prod-frontend:
+	docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --no-deps --build frontend
+
+migrate-prod:
+	docker compose -f docker-compose.prod.yml --env-file .env.prod run --rm --no-deps backend migrate -path /app/migrations -database "postgres://$$(grep DB_USER .env.prod | cut -d= -f2):$$(grep DB_PASSWORD .env.prod | cut -d= -f2)@postgres:5432/$$(grep DB_NAME .env.prod | cut -d= -f2)?sslmode=disable" up
+
+seed-prod:
+	docker compose -f docker-compose.prod.yml --env-file .env.prod run --rm --no-deps backend /app/seed
 
 logs:
 	docker compose logs -f
