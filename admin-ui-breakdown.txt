@@ -1,0 +1,163 @@
+# Nexara Food — Admin Panel UI/UX Breakdown
+
+## Current Layout
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ [Header: Nexara logo | EN ▼ | UserName | Admin | Logout] │
+├──────────────────────────────────────────────────────────┤
+│ Admin (h1, 24px bold)                                    │
+│                                                          │
+│ [Orders] [Restaurants] [Couriers]  ← tab underline style │
+│ ════════════════════════════════════════════════════════ │
+│                                                          │
+│ ┌── TAB: Orders ──────────────────────────────────────┐  │
+│ │ [All] [Pending] [Accepted] [Delivered]  ← pill filters│  │
+│ │                                                      │  │
+│ │ ┌────────────────────────────────────────────────┐   │  │
+│ │ │ Restaurant Name              [status badge]    │   │  │
+│ │ │ Customer Name | Phone | Address                │   │  │
+│ │ │ Note: buy bread (orange bg)                    │   │  │
+│ │ │ [item1 ×2] [item2 ×1] [item3 ×1]              │   │  │
+│ │ │ $86.00                                         │   │  │
+│ │ │ Courier: Name (phone)  (green text)            │   │  │
+│ │ │ [Accept] [Assign courier ▼] [Mark Delivered]   │   │  │
+│ │ └────────────────────────────────────────────────┘   │  │
+│ └──────────────────────────────────────────────────────┘  │
+│                                                          │
+│ ┌── TAB: Restaurants ────────────────────────────────┐  │
+│ │ [Name input] [Desc input] [Upload btn] [Add Rest]  │  │
+│ │                                                      │  │
+│ │ ┌────────────────────────────────────────────────┐   │  │
+│ │ │ Restaurant Name                    [Delete]    │   │  │
+│ │ │ [Manage Foods]                                 │   │  │
+│ │ │   ┌── Expanded food section ──────────────┐   │   │  │
+│ │ │   │ [Name] [Desc] [Price] [Cat▼]          │   │   │  │
+│ │ │   │ [Upload] [Add Food]                   │   │   │  │
+│ │ │   │ Food1          $22.00      [Delete]   │   │   │  │
+│ │ │   │ Food2          $26.00      [Delete]   │   │   │  │
+│ │ │   └───────────────────────────────────────┘   │   │  │
+│ │ └────────────────────────────────────────────────┘   │  │
+│ └──────────────────────────────────────────────────────┘  │
+│                                                          │
+│ ┌── TAB: Couriers ──────────────────────────────────┐  │
+│ │ [User ID] [Name] [Phone] [Add Courier]             │  │
+│ │                                                      │  │
+│ │ ┌────────────────────────────────────────────────┐   │  │
+│ │ │ Courier Name                    Phone          │   │  │
+│ │ └────────────────────────────────────────────────┘   │  │
+│ └──────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────┘
+```
+
+## Design System (Same as Rest of App)
+
+```
+Primary:       #dc2626 (red)
+Background:    #fafaf9 (warm white)
+Surface:       #ffffff (white cards)
+Text:          #1c1917 (near black)
+Text secondary:#57534e (warm gray)
+Border:        #e7e5e4 (light gray)
+Radius:        12px (cards), 8px (inputs/buttons)
+Font:          system-ui stack
+Max width:     960px
+```
+
+## Tab 1: Orders
+
+### Current State
+- Filter pills: rounded 20px, red when active, gray when inactive
+- Order cards: white bg, 1px border, 12px radius, 16px padding
+- Status badges: yellow (pending), blue (accepted), green (delivered)
+- Customer info: name | phone | address in one row, 13px gray
+- Note: orange background box if present
+- Items: small gray tags with "food × qty"
+- Total: 16px bold
+- Courier info: green text if assigned
+- Actions: red buttons (Accept, Mark Delivered), select dropdown for courier assignment
+
+### Problems
+- All info crammed into one card — hard to scan
+- No visual hierarchy between customer info, items, and actions
+- No order time/date shown
+- No order ID visible
+- No way to see order details (items list is inline, gets messy with many items)
+- Actions at bottom — have to scroll past all info to act
+- No "reject/cancel" action for orders
+- No search/filter by restaurant or courier
+- No pagination — all orders load at once
+- No sound/visual notification for new orders
+
+## Tab 2: Restaurants
+
+### Current State
+- Create form: horizontal row of inputs + upload button + submit button
+- Upload button: dashed border style, shows "..." while uploading, "✓" when done
+- Restaurant list: cards with name + delete button
+- "Manage Foods" button toggles food section
+- Food section: same horizontal form row (name, desc, price, category dropdown, upload, add)
+- Food list: simple rows with name, price, delete button
+
+### Problems
+- Create form is always visible at top — takes space even when not adding
+- Upload button is confusing (dashed border, no preview)
+- "Manage Foods" toggle is clunky — have to open each restaurant individually
+- Food form is identical to restaurant form — no visual distinction
+- No image preview for restaurants or foods
+- No edit functionality for restaurants (only create and delete)
+- No edit for foods (only create and delete)
+- No way to reorder foods or categories
+- No restaurant status toggle (active/inactive) in UI
+- Delete has no confirmation dialog
+
+## Tab 3: Couriers
+
+### Current State
+- Create form: User ID + Name + Phone + Add button
+- Courier list: simple cards with name and phone
+
+### Problems
+- Requires manual User ID input — admin has to know the UUID
+- No way to search users by email/name to find their ID
+- No edit functionality
+- No active/inactive toggle
+- No courier statistics (orders completed, currently assigned)
+- Simplest tab but still feels bare
+
+## Overall Admin Problems
+
+```
+  · No sidebar navigation — tabs at top feel cramped
+  · No dashboard/overview with stats (orders today, revenue, active couriers)
+  · No search anywhere
+  · No pagination on any list
+  · No confirmation dialogs for destructive actions (delete)
+  · No success/error toast notifications — errors show as inline red box
+  · No loading skeletons — just "Loading..." text
+  · No responsive table view — everything is cards even on desktop
+  · No export functionality
+  · No order detail view — all info inline in cards
+  · Forms are always visible — should be collapsible or in a modal
+  · No image preview before upload
+  · No drag-and-drop for image upload
+  · Currency shown as $ instead of TJS (сомони)
+```
+
+## What a Good Admin Panel Should Have
+
+```
+  · Sidebar with navigation (collapsible on mobile)
+  · Dashboard with key metrics (orders today, revenue, active couriers, pending orders)
+  · Orders: table view with sortable columns, expandable detail rows, quick actions
+  · Restaurants: grid/list toggle, image previews, inline edit, modal for create
+  · Foods: grouped by restaurant, drag-to-reorder, bulk actions
+  · Couriers: table with status, order count, contact info
+  · Search and filters on every list
+  · Pagination or infinite scroll
+  · Confirmation modals for delete
+  · Toast notifications for success/error
+  · Proper form layouts with labels (not just placeholders)
+  · Image upload with preview
+  · Responsive: tables collapse to cards on mobile
+```

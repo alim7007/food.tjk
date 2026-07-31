@@ -1,161 +1,206 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/layout/Header";
-import Container from "@/components/layout/Container";
-import { fetchRestaurantById, fetchFoodsByRestaurant, createOrder } from "@/lib/api";
+import { fetchRestaurantById, fetchFoodsByRestaurant, fetchCategories, createOrder } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import { imageUrl } from "@/lib/image";
 import { validatePhone, validateRequired } from "@/lib/validation";
 import { getBasket, addToBasket, updateQuantity, removeFromBasket, clearBasket, getBasketCount, getBasketTotal } from "@/lib/basket";
-import type { Restaurant, Food, BasketItem } from "@/lib/types";
+import { SkeletonFoodCard } from "@/components/ui/Skeleton";
+import ProductModal from "@/components/ui/ProductModal";
+import type { Restaurant, Food, Category, BasketItem } from "@/lib/types";
 import styles from "./page.module.css";
 
 export default function RestaurantPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { t } = useI18n();
+  const router = useRouter();
 
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [foods, setFoods] = useState<Food[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [basket, setBasket] = useState<BasketItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showOrderForm, setShowOrderForm] = useState(false);
-  const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
-  const [note, setNote] = useState("");
-  const [ordering, setOrdering] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(false);
-  const [formErrors, setFormErrors] = useState<{ address?: string; phone?: string }>({});
+  const [activeCat, setActiveCat] = useState("");
+  const [modalFood, setModalFood] = useState<Food | null>(null);
+  const [addedFeedback, setAddedFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    Promise.all([fetchRestaurantById(id), fetchFoodsByRestaurant(id)])
-      .then(([r, f]) => { setRestaurant(r); setFoods(f); setBasket(getBasket(id)); setError(null); })
+    Promise.all([
+      fetchRestaurantById(id),
+      fetchFoodsByRestaurant(id),
+      fetchCategories(),
+    ])
+      .then(([r, f, cat]) => {
+        setRestaurant(r);
+        setFoods(f);
+        setCategories(cat);
+        setBasket(getBasket(id));
+        setError(null);
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleAdd = (food: Food) => setBasket(addToBasket(id, food));
-  const handleQty = (foodId: string, qty: number) => setBasket(updateQuantity(id, foodId, qty));
-  const handleRemove = (foodId: string) => setBasket(removeFromBasket(id, foodId));
+  const catMap = new Map(categories.map((c) => [c.id, c.name]));
+  const foodCategories = [...new Set(foods.map((f) => f.category_id))];
+  const filteredFoods = activeCat
+    ? foods.filter((f) => f.category_id === activeCat)
+    : foods;
 
-  const handleOrder = async () => {
-    const addrErr = validateRequired(address, "Address");
-    const phoneErr = validatePhone(phone);
-    if (addrErr || phoneErr) {
-      setFormErrors({ address: addrErr || undefined, phone: phoneErr || undefined });
-      return;
-    }
-    setFormErrors({});
-    setOrdering(true);
-    try {
-      await createOrder({
-        restaurant_id: id,
-        items: basket.map((item) => ({ food_id: item.food.id, quantity: item.quantity })),
-        delivery_address: address,
-        delivery_phone: phone,
-        note: note || undefined,
-      });
-      clearBasket(id);
-      setBasket([]);
-      setOrderSuccess(true);
-      setShowOrderForm(false);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setOrdering(false);
-    }
+  const handleAddToBasket = useCallback((food: Food, qty: number) => {
+    setBasket(addToBasket(id, food, qty));
+    setModalFood(null);
+    setAddedFeedback(food.name);
+    setTimeout(() => setAddedFeedback(null), 2000);
+  }, [id]);
+
+  const handleQty = (foodId: string, qty: number) => {
+    setBasket(updateQuantity(id, foodId, qty));
+  };
+
+  const handleRemove = (foodId: string) => {
+    setBasket(removeFromBasket(id, foodId));
   };
 
   const count = getBasketCount(id);
   const subtotal = getBasketTotal(id);
 
-  if (loading) return <><Header /><Container><div className={styles.loading}>{t("site.loading")}</div></Container></>;
-  if (error) return <><Header /><Container><div className={styles.error}>{error}</div></Container></>;
-  if (!restaurant) return <><Header /><Container><div className={styles.error}>Not found</div></Container></>;
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <div className={styles.page}>
+          <div className={styles.restHeader}>
+            <div className={styles.backBtn} onClick={() => router.back()}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </div>
+            <div className={styles.skeletonTitle} />
+          </div>
+          <div className={styles.foodGrid}>
+            {[1,2,3,4].map((i) => <SkeletonFoodCard key={i} />)}
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (error || !restaurant) {
+    return (
+      <>
+        <Header />
+        <div className={styles.page}>
+          <div className={styles.error}>
+            <p>{error || "Not found"}</p>
+            <button className={styles.retryBtn} onClick={() => router.back()}>
+              {t("site.back")}
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
       <Header />
-      <Container>
-        <div className={styles.header}>
-          {restaurant.image_url && <img src={imageUrl(restaurant.image_url)!} alt={restaurant.name} className={styles.restImage} />}
-          <h1 className={styles.name}>{restaurant.name}</h1>
-          {restaurant.description && <p className={styles.desc}>{restaurant.description}</p>}
+      <div className={styles.page}>
+        <div className={styles.restHeader}>
+          <button className={styles.backBtn} onClick={() => router.back()}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div className={styles.restInfo}>
+            <h1 className={styles.restName}>{restaurant.name}</h1>
+            {restaurant.description && (
+              <p className={styles.restDesc}>{restaurant.description}</p>
+            )}
+            <div className={styles.restMeta}>
+              <span className={styles.metaItem}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                30-45 min
+              </span>
+              <span className={styles.metaItem}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                10 TJS
+              </span>
+            </div>
+          </div>
         </div>
 
-        {orderSuccess && <div className={styles.success}>{t("site.orderSuccess")}</div>}
-
-        <div className={styles.layout}>
-          <div className={styles.menu}>
-            <h2 className={styles.sectionTitle}>{t("site.menu")}</h2>
-            {foods.length === 0 && <div className={styles.empty}>No items</div>}
-            {foods.map((food) => (
-              <div key={food.id} className={styles.foodItem}>
-                {food.image_url && <img src={imageUrl(food.image_url)!} alt={food.name} className={styles.foodImage} />}
-                <div className={styles.foodInfo}>
-                  <h3 className={styles.foodName}>{food.name}</h3>
-                  {food.description && <p className={styles.foodDesc}>{food.description}</p>}
-                  <span className={styles.foodPrice}>${food.price.toFixed(2)}</span>
-                </div>
-                <button className={styles.addBtn} onClick={() => handleAdd(food)}>+</button>
-              </div>
+        {foodCategories.length > 1 && (
+          <div className={styles.categories}>
+            <button
+              className={`${styles.catPill} ${activeCat === "" ? styles.catActive : ""}`}
+              onClick={() => setActiveCat("")}
+            >
+              {t("site.all")}
+            </button>
+            {foodCategories.map((catId) => (
+              <button
+                key={catId}
+                className={`${styles.catPill} ${activeCat === catId ? styles.catActive : ""}`}
+                onClick={() => setActiveCat(catId)}
+              >
+                {catMap.get(catId) || catId}
+              </button>
             ))}
           </div>
+        )}
 
-          <div className={styles.sidebar}>
-            <h2 className={styles.sectionTitle}>{t("site.basket")}</h2>
-            {basket.length === 0 ? (
-              <p className={styles.emptyBasket}>{t("site.emptyBasket")}</p>
-            ) : (
-              <>
-                <div className={styles.basketItems}>
-                  {basket.map((item) => (
-                    <div key={item.food.id} className={styles.basketItem}>
-                      <div className={styles.basketItemInfo}>
-                        <span className={styles.basketItemName}>{item.food.name}</span>
-                        <span className={styles.basketItemPrice}>${(item.food.price * item.quantity).toFixed(2)}</span>
-                      </div>
-                      <div className={styles.basketItemQty}>
-                        <button onClick={() => handleQty(item.food.id, item.quantity - 1)}>-</button>
-                        <span>{item.quantity}</span>
-                        <button onClick={() => handleQty(item.food.id, item.quantity + 1)}>+</button>
-                        <button className={styles.removeBtn} onClick={() => handleRemove(item.food.id)}>✕</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className={styles.basketTotal}><span>{t("site.subtotal")}</span><strong>${subtotal.toFixed(2)}</strong></div>
-                <div className={styles.basketTotal}><span>{t("site.delivery")}</span><strong>$10.00</strong></div>
-                <div className={styles.basketTotal}><span>{t("site.total")}</span><strong>${(subtotal + 10).toFixed(2)}</strong></div>
+        {filteredFoods.length === 0 && (
+          <div className={styles.empty}>{t("site.noFoods")}</div>
+        )}
 
-                {!showOrderForm ? (
-                  <button className={styles.orderBtn} onClick={() => setShowOrderForm(true)}>
-                    {t("site.placeOrder")} ({count} {t("site.items")})
-                  </button>
+        <div className={styles.foodGrid}>
+          {filteredFoods.map((food) => (
+            <div key={food.id} className={styles.foodCard} onClick={() => setModalFood(food)}>
+              <div className={styles.foodImage}>
+                {food.image_url ? (
+                  <img src={imageUrl(food.image_url)!} alt={food.name} />
                 ) : (
-                  <div className={styles.orderForm}>
-                    <input className={`${styles.input} ${formErrors.address ? styles.inputError : ""}`} placeholder={t("site.deliveryAddress")} value={address} onChange={(e) => { setAddress(e.target.value); setFormErrors((p) => ({ ...p, address: undefined })); }} />
-                    {formErrors.address && <span className={styles.fieldError}>{formErrors.address}</span>}
-                    <input className={`${styles.input} ${formErrors.phone ? styles.inputError : ""}`} placeholder={t("site.phoneNumber")} value={phone} onChange={(e) => { setPhone(e.target.value); setFormErrors((p) => ({ ...p, phone: undefined })); }} />
-                    {formErrors.phone && <span className={styles.fieldError}>{formErrors.phone}</span>}
-                    <textarea className={styles.textarea} placeholder={t("site.note")} value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
-                    <button className={styles.orderBtn} onClick={handleOrder} disabled={ordering}>
-                      {ordering ? "..." : t("site.confirmOrder")}
-                    </button>
-                    <button className={styles.cancelBtn} onClick={() => { setShowOrderForm(false); setFormErrors({}); }}>{t("site.cancel")}</button>
+                  <div className={styles.foodPlaceholder}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
                   </div>
                 )}
-              </>
-            )}
-          </div>
+              </div>
+              <div className={styles.foodBody}>
+                <h3 className={styles.foodName}>{food.name}</h3>
+                <span className={styles.foodPrice}>{food.price.toFixed(2)} TJS</span>
+              </div>
+            </div>
+          ))}
         </div>
-      </Container>
+
+        {count > 0 && (
+          <button
+            className={styles.basketFloat}
+            onClick={() => router.push(`/restaurants/${id}/basket`)}
+          >
+            <span className={styles.basketFloatCount}>{count}</span>
+            <span>{t("site.viewBasket")}</span>
+            <span className={styles.basketFloatPrice}>{(subtotal + 10).toFixed(2)} TJS</span>
+          </button>
+        )}
+
+        {addedFeedback && (
+          <div className={styles.toast}>{addedFeedback} — {t("site.addedToBasket")}</div>
+        )}
+      </div>
+
+      {modalFood && (
+        <ProductModal
+          food={modalFood}
+          onClose={() => setModalFood(null)}
+          onAdd={handleAddToBasket}
+        />
+      )}
     </>
   );
 }

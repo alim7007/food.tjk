@@ -2,7 +2,7 @@
   "site": {
     "title": "Nexara — Food Delivery",
     "subtitle": "Order from the best restaurants in town",
-    "search": "Search restaurants...",
+    "search": "Search restaurants or food...",
     "noRestaurants": "No restaurants found",
     "loading": "Loading...",
     "login": "Login",
@@ -59,6 +59,27 @@
     "status": "Status",
     "language": "Language",
     "installApp": "📲 Install App",
-    "installPrompt": "Install the app for easy access"
+    "installPrompt": "Install the app for easy access",
+    "deliveringTo": "Delivering to",
+    "addAddress": "Add address",
+    "profile": "Profile",
+    "addToBasket": "Add to basket",
+    "viewBasket": "View basket",
+    "proceedToCheckout": "Proceed to checkout",
+    "clearBasket": "Clear basket",
+    "clearBasketConfirm": "Clear the basket?",
+    "yes": "Yes",
+    "no": "No",
+    "minOrder": "Minimum order",
+    "needMore": "Need more",
+    "deliveryFee": "Delivery fee",
+    "retry": "Retry",
+    "back": "Back",
+    "selectOptions": "Select options",
+    "required": "Required",
+    "quantity": "Quantity",
+    "addedToBasket": "Added to basket",
+    "noFoods": "No foods available",
+    "noResults": "No results found"
   }
 }

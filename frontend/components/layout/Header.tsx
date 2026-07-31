@@ -29,14 +29,13 @@ export default function Header() {
             value={lang}
             onChange={(e) => setLang(e.target.value as any)}
           >
-            <option value="tj">🇹🇯 TJ</option>
-            <option value="ru">🇷🇺 RU</option>
-            <option value="en">🇬🇧 EN</option>
+            <option value="tj">TJ</option>
+            <option value="ru">RU</option>
+            <option value="en">EN</option>
           </select>
 
           {user ? (
             <>
-              <span className={styles.userName}>{user.name}</span>
               {user.role === "customer" && (
                 <Link href="/orders" className={styles.navLink}>
                   {t("site.myOrders")}
@@ -60,9 +59,6 @@ export default function Header() {
             <>
               <Link href="/login" className={styles.navLink}>
                 {t("site.login")}
-              </Link>
-              <Link href="/register" className={styles.navLink}>
-                {t("site.register")}
               </Link>
             </>
           )}

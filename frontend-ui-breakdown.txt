@@ -1,0 +1,321 @@
+# Nexara Food — Current Frontend UI/UX Breakdown
+
+## Design System
+
+```
+Primary color:  #dc2626 (red)
+Background:     #fafaf9 (warm white)
+Surface:        #ffffff (white cards)
+Text:           #1c1917 (near black)
+Text secondary: #57534e (warm gray)
+Border:         #e7e5e4 (light gray)
+Font:           system-ui stack
+Max width:      960px
+Border radius:  12px (cards), 8px (inputs)
+Header height:  64px, sticky
+```
+
+## 1. Homepage (/)
+
+```
+┌─────────────────────────────────────────────┐
+│ [Header: Nexara logo | EN ▼ | Login | Reg]  │
+├─────────────────────────────────────────────┤
+│                                             │
+│     Nexara — Food Delivery (h1, 28px)        │
+│   Order from the best restaurants (15px)    │
+│   ┌──────────────────────────────┐          │
+│   │ Search restaurants...        │          │
+│   └──────────────────────────────┘          │
+│                                             │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
+│  │ [image]  │  │ [image]  │  │ [image]  │  │
+│  │ Name     │  │ Name     │  │ Name     │  │
+│  │ Desc...  │  │ Desc...  │  │ Desc...  │  │
+│  └──────────┘  └──────────┘  └──────────┘  │
+│                                             │
+└─────────────────────────────────────────────┘
+```
+
+- Hero section: centered title + subtitle + search input (480px max-width)
+- Restaurant cards: 260px min-width grid, image (160px height, cover), name + 2-line description
+- Cards have hover lift effect (translateY -2px)
+- No categories, no filters, no delivery time, no rating, no "open/closed" badge
+- Mobile: single column, smaller title
+
+## 2. Restaurant Menu (/restaurants/[id])
+
+```
+┌─────────────────────────────────────────────┐
+│ [Header]                                    │
+├─────────────────────────────────────────────┤
+│ ┌───────────────────────────────────────┐   │
+│ │ [Restaurant image, full width, 240px]  │   │
+│ │ Restaurant Name (24px bold)            │   │
+│ │ Description (14px gray)                │   │
+│ └───────────────────────────────────────┘   │
+│                                             │
+│ ┌── Menu (left) ──┐ ┌── Basket (right) ──┐  │
+│ │                 │ │                    │  │
+│ │ [img] Name      │ │ Basket (sticky)    │  │
+│ │       Desc      │ │                    │  │
+│ │       $price  [+]│ │ Item × qty  $price │  │
+│ │                 │ │ [-][1][+][✕]       │  │
+│ │ [img] Name      │ │                    │  │
+│ │       Desc      │ │ Subtotal    $xx.xx │  │
+│ │       $price  [+]│ │ Delivery    $10.00 │  │
+│ │                 │ │ Total       $xx.xx │  │
+│ │                 │ │                    │  │
+│ │                 │ │ [Place Order (3)]  │  │
+│ └─────────────────┘ └────────────────────┘  │
+└─────────────────────────────────────────────┘
+```
+
+- Two-column layout: menu (flexible) + sidebar (360px, sticky)
+- Food items: horizontal row — 64px image, name + desc + price, red circle "+" button
+- Basket: sticky sidebar, item list with qty controls (-/+/✕), subtotal/delivery/total
+- "Place Order" button shows item count
+- Clicking it reveals inline form: address, phone, note, confirm/cancel
+- No food categories/tabs, no search within menu, no "popular" section
+- Mobile: single column, sidebar becomes static below menu
+
+## 3. Login (/login)
+
+```
+┌─────────────────────────────────────────────┐
+│ [Header]                                    │
+├─────────────────────────────────────────────┤
+│              ┌──────────────┐               │
+│              │    Login     │               │
+│              │              │               │
+│              │ [Email     ] │               │
+│              │ [Password  ] │               │
+│              │              │               │
+│              │ [  Login  ]  │               │
+│              │              │               │
+│              │  Register →  │               │
+│              └──────────────┘               │
+└─────────────────────────────────────────────┘
+```
+
+- Centered card, 400px max-width
+- Two inputs (email, password) + red submit button
+- Link to register at bottom
+- No "forgot password", no social login, no logo above form
+- Error shown as red box above form
+
+## 4. Register (/register)
+
+```
+┌─────────────────────────────────────────────┐
+│ [Header]                                    │
+├─────────────────────────────────────────────┤
+│              ┌──────────────┐               │
+│              │   Register   │               │
+│              │              │               │
+│              │ [Name      ] │               │
+│              │ [Email     ] │               │
+│              │ [Password  ] │               │
+│              │ [Phone     ] │               │
+│              │ [Address   ] │               │
+│              │ [Role  ▼   ] │               │
+│              │              │               │
+│              │ [ Register ] │               │
+│              │              │               │
+│              │  Login →     │               │
+│              └──────────────┘               │
+└─────────────────────────────────────────────┘
+```
+
+- Same centered card style as login
+- 5 inputs + role dropdown (customer/courier)
+- No terms checkbox, no password confirmation field
+- Same error display pattern
+
+## 5. My Orders (/orders) — Customer
+
+```
+┌─────────────────────────────────────────────┐
+│ [Header]                                    │
+├─────────────────────────────────────────────┤
+│ My Orders (24px bold)                       │
+│ [All] [Pending] [Accepted] [Delivered]      │
+│                                             │
+│ ┌───────────────────────────────────────┐   │
+│ │ Restaurant Name        [status badge] │   │
+│ │ 3 items                    $45.00     │   │
+│ │ Delivery address                      │   │
+│ └───────────────────────────────────────┘   │
+│                                             │
+│ ┌───────────────────────────────────────┐   │
+│ │ Restaurant Name        [status badge] │   │
+│ │ ...                                   │   │
+│ └───────────────────────────────────────┘   │
+└─────────────────────────────────────────────┘
+```
+
+- Filter pills: rounded, red when active
+- Order cards: restaurant name + status badge (yellow/blue/green), item count + total, address
+- Cards are clickable → order detail page
+- No order date/time shown, no "reorder" button
+
+## 6. Order Detail (/orders/[id])
+
+```
+┌─────────────────────────────────────────────┐
+│ [Header]                                    │
+├─────────────────────────────────────────────┤
+│ Order from Restaurant Name                  │
+│                                             │
+│   (1)────(2)────(3)                         │
+│  Pending Accepted Delivered                │
+│                                             │
+│ ┌── Items ──────────────────────────────┐   │
+│ │ Food name × 2              $56.00     │   │
+│ │ Food name × 1              $20.00     │   │
+│ │ ─────────────────────────────────      │   │
+│ │ Subtotal                   $76.00     │   │
+│ │ Delivery                   $10.00     │   │
+│ │ Total                      $86.00     │   │
+│ └───────────────────────────────────────┘   │
+│                                             │
+│ ┌── Delivery ──────────────────────────┐   │
+│ │ Address         123 Main St           │   │
+│ │ Phone           +992900000001         │   │
+│ │ Note            Buy bread             │   │
+│ │ Courier         Name (phone)          │   │
+│ └───────────────────────────────────────┘   │
+└─────────────────────────────────────────────┘
+```
+
+- 3-step stepper: circles connected by lines, completed steps turn red
+- Two info cards: items breakdown + delivery details
+- No map, no ETA, no "contact courier" button, no cancel button
+
+## 7. Admin Panel (/admin)
+
+```
+┌─────────────────────────────────────────────┐
+│ [Header]                                    │
+├─────────────────────────────────────────────┤
+│ Admin                                       │
+│ [Orders] [Restaurants] [Couriers]           │
+│ ═══════════════════════════════════════════ │
+│                                             │
+│ TAB: Orders                                 │
+│ [All] [Pending] [Accepted] [Delivered]      │
+│                                             │
+│ ┌───────────────────────────────────────┐   │
+│ │ Restaurant Name     [status]          │   │
+│ │ Customer | Phone | Address            │   │
+│ │ Note: buy bread                       │   │
+│ │ [item1] [item2] [item3]               │   │
+│ │ $86.00                                │   │
+│ │ Courier: Name (phone)                 │   │
+│ │ [Accept] [Assign courier ▼] [Deliver] │   │
+│ └───────────────────────────────────────┘   │
+│                                             │
+│ TAB: Restaurants                            │
+│ [Name] [Description] [Upload] [Add Rest]    │
+│                                             │
+│ ┌───────────────────────────────────────┐   │
+│ │ Restaurant Name           [Delete]    │   │
+│ │ [Manage Foods]                        │   │
+│ │   ┌─ Foods form ──────────────────┐   │   │
+│ │   │ [Name][Desc][Price][Cat▼]     │   │   │
+│ │   │ [Upload][Add Food]            │   │   │
+│ │   │ Food1    $22.00    [Delete]   │   │   │
+│ │   │ Food2    $26.00    [Delete]   │   │   │
+│ │   └──────────────────────────────┘   │   │
+│ └───────────────────────────────────────┘   │
+│                                             │
+│ TAB: Couriers                               │
+│ [User ID] [Name] [Phone] [Add Courier]      │
+│ ┌───────────────────────────────────────┐   │
+│ │ Courier Name              Phone       │   │
+│ └───────────────────────────────────────┘   │
+└─────────────────────────────────────────────┘
+```
+
+- Tabbed interface with underline-style active tab
+- Orders tab: filter pills + order cards with full details and action buttons
+- Restaurants tab: create form + list with expandable food management
+- Couriers tab: create form + simple list
+- No dashboard/statistics, no search, no pagination, no order detail view
+- Upload button is dashed-border style
+
+## 8. Courier Orders (/courier/orders)
+
+```
+┌─────────────────────────────────────────────┐
+│ [Header]                                    │
+├─────────────────────────────────────────────┤
+│ My Orders                                   │
+│ [All] [Accepted] [Delivered]                │
+│                                             │
+│ ┌───────────────────────────────────────┐   │
+│ │ Restaurant Name     [status]          │   │
+│ │ Customer | Phone                      │   │
+│ │ Address                               │   │
+│ │ Note: buy bread                       │   │
+│ │ [item1] [item2]                       │   │
+│ │ $86.00                                │   │
+│ └───────────────────────────────────────┘   │
+└─────────────────────────────────────────────┘
+```
+
+- Same filter pills pattern
+- Order cards: restaurant, status, customer info, address, items, total
+- No "mark as delivered" button, no map, no navigation link
+- Read-only view — courier can't update status
+
+## Header (All Pages)
+
+```
+┌──────────────────────────────────────────────┐
+│ Nexara    [EN ▼]  Login  Register            │
+│ ── or ──                                     │
+│ Nexara    [EN ▼]  UserName  MyOrders  Logout │
+│ ── or ──                                     │
+│ Nexara    [EN ▼]  UserName  Admin  Logout    │
+│ ── or ──                                     │
+│ Nexara    [EN ▼]  UserName  Orders  Logout   │
+└──────────────────────────────────────────────┘
+```
+
+- Sticky, white background, bottom border
+- Logo: "Nexara" in red, 18px, bold
+- Language switcher: small select with flag emojis (TJ/RU/EN)
+- Role-based nav links
+- No cart icon with count, no mobile hamburger menu, no search in header
+- On mobile: logo shrinks, username hidden
+
+## What's Missing (Compared to Modern Food Delivery Apps)
+
+```
+  · Bottom navigation bar (mobile)
+  · Category tabs on homepage
+  · Food category tabs inside restaurant menu
+  · Delivery time estimates
+  · Restaurant rating/stars
+  · "Open now" / "Closed" badges
+  · Cart floating button with item count
+  · Food item modals/popups (instead of inline add)
+  · Order tracking map
+  · Push notifications
+  · Dark mode
+  · Skeleton loading states
+  · Pull-to-refresh
+  · Price in TJS (currently shows $)
+  · Restaurant logo (currently full-width banner)
+  · Food item cards with better layout (image left, details right)
+  · Quantity selector on food items before adding
+  · "Popular items" section
+  · Search within restaurant menu
+  · Order history with dates
+  · Reorder functionality
+  · Admin dashboard with stats (orders today, revenue, etc.)
+  · Admin order detail view
+  · Courier "mark delivered" button
+  · Courier navigation/directions
+```

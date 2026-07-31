@@ -2,7 +2,7 @@
   "site": {
     "title": "Nexara — Доставка еды",
     "subtitle": "Закажите из лучших ресторанов города",
-    "search": "Поиск ресторанов...",
+    "search": "Поиск ресторанов или блюд...",
     "noRestaurants": "Рестораны не найдены",
     "loading": "Загрузка...",
     "login": "Вход",
@@ -59,6 +59,27 @@
     "status": "Статус",
     "language": "Язык",
     "installApp": "📲 Установить приложение",
-    "installPrompt": "Для удобства установите приложение"
+    "installPrompt": "Для удобства установите приложение",
+    "deliveringTo": "Доставка на",
+    "addAddress": "Добавить адрес",
+    "profile": "Профиль",
+    "addToBasket": "В корзину",
+    "viewBasket": "Корзина",
+    "proceedToCheckout": "К оформлению",
+    "clearBasket": "Очистить корзину",
+    "clearBasketConfirm": "Очистить корзину?",
+    "yes": "Да",
+    "no": "Нет",
+    "minOrder": "Минимальный заказ",
+    "needMore": "Нужно ещё",
+    "deliveryFee": "Стоимость доставки",
+    "retry": "Повторить",
+    "back": "Назад",
+    "selectOptions": "Выберите опции",
+    "required": "Обязательно",
+    "quantity": "Количество",
+    "addedToBasket": "Добавлено в корзину",
+    "noFoods": "Нет блюд",
+    "noResults": "Ничего не найдено"
   }
 }

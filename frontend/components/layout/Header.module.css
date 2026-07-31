@@ -1,10 +1,10 @@
 .header {
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
   position: sticky;
   top: 0;
   z-index: 100;
   height: var(--header-height);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .inner {
@@ -18,7 +18,7 @@
 }
 
 .logo {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
   color: var(--color-primary);
   text-decoration: none;
@@ -28,16 +28,16 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .langSelect {
-  padding: 4px 8px;
+  padding: 4px 6px;
   border: 1px solid var(--color-border);
   border-radius: 6px;
   font-size: 12px;
   background: var(--color-surface);
+  color: var(--color-text);
   cursor: pointer;
   margin-right: 4px;
 }
@@ -47,7 +47,7 @@
   color: var(--color-text-secondary);
   text-decoration: none;
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   white-space: nowrap;
   background: none;
   border: none;
@@ -56,29 +56,16 @@
 }
 
 .navLink:hover {
-  background: var(--color-bg);
+  background: var(--color-surface-hover);
   color: var(--color-text);
-}
-
-.userName {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text);
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 @media (max-width: 600px) {
   .logo {
-    font-size: 15px;
+    font-size: 17px;
   }
   .navLink {
     font-size: 12px;
-    padding: 4px 6px;
-  }
-  .userName {
-    display: none;
+    padding: 4px 8px;
   }
 }

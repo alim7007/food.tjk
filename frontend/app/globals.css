@@ -12,14 +12,16 @@ html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--color-bg);
 }
 
 body {
   font-family: var(--font-sans);
   background: var(--color-bg);
   color: var(--color-text);
-  line-height: 1.6;
+  line-height: 1.5;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 a {
@@ -32,9 +34,19 @@ button {
   cursor: pointer;
   border: none;
   background: none;
+  color: inherit;
 }
 
 img {
   max-width: 100%;
   display: block;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+body.modal-open {
+  overflow: hidden;
 }
