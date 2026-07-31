@@ -29,7 +29,6 @@ export default function AdminDashboard() {
   const pendingOrders = orders.filter((o) => o.status === "pending");
   const today = new Date().toISOString().split("T")[0];
   const todayOrders = orders.filter((o) => o.created_at.startsWith(today));
-  const todayRevenue = todayOrders.reduce((sum, o) => sum + o.total, 0);
   const activeCouriers = couriers.filter((c) => c.is_active);
 
   const recentOrders = [...orders]
@@ -59,10 +58,6 @@ export default function AdminDashboard() {
         <div className={styles.metricCard}>
           <span className={styles.metricValue}>{todayOrders.length}</span>
           <span className={styles.metricLabel}>{t("site.ordersToday")}</span>
-        </div>
-        <div className={styles.metricCard}>
-          <span className={styles.metricValue}>{todayRevenue.toFixed(0)} TJS</span>
-          <span className={styles.metricLabel}>{t("site.revenueToday")}</span>
         </div>
         <div className={styles.metricCard}>
           <span className={styles.metricValue}>{activeCouriers.length}</span>

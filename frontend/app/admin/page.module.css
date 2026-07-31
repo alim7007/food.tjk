@@ -1,11 +1,11 @@
 .page { max-width: 1100px; }
 .pageTitle { font-size: 22px; font-weight: 800; margin-bottom: 24px; color: var(--admin-text); }
 
-.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
-.metricCard { background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius); padding: 20px; display: flex; flex-direction: column; gap: 4px; }
-.metricValue { font-size: 28px; font-weight: 800; color: var(--admin-primary); }
-.metricLabel { font-size: 13px; color: var(--admin-text-secondary); }
-.metricSkeleton { height: 88px; background: var(--admin-surface); border-radius: var(--admin-radius); }
+.metrics { display: flex; gap: 12px; margin-bottom: 32px; }
+.metricCard { background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius); padding: 16px 20px; display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.metricValue { font-size: 24px; font-weight: 800; color: var(--admin-primary); }
+.metricLabel { font-size: 12px; color: var(--admin-text-secondary); }
+.metricSkeleton { height: 72px; background: var(--admin-surface); border-radius: var(--admin-radius); flex: 1; }
 
 .section { margin-bottom: 28px; }
 .sectionHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
