@@ -25,7 +25,7 @@ func NewRouter(pool *pgxpool.Pool, cfg config.Config) http.Handler {
 	r.Use(chimiddleware.Recoverer)
 	r.Use(chimiddleware.Timeout(30 * time.Second))
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{cfg.AllowedOrigins},
+		AllowedOrigins:   cfg.AllowedOriginList(),
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Content-Type", "Authorization"},
 		AllowCredentials: true,

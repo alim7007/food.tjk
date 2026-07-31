@@ -1,6 +1,10 @@
 package config
 
-import "github.com/caarlos0/env/v11"
+import (
+	"strings"
+
+	"github.com/caarlos0/env/v11"
+)
 
 type Config struct {
 	DatabaseURL          string `env:"DATABASE_URL,required"`
@@ -12,6 +16,10 @@ type Config struct {
 	JWTExpiryMinutes     int    `env:"JWT_EXPIRY_MINUTES" envDefault:"60"`
 	JWTRefreshExpiryDays int    `env:"JWT_REFRESH_EXPIRY_DAYS" envDefault:"7"`
 	BcryptCost           int    `env:"BCRYPT_COST" envDefault:"12"`
+}
+
+func (c Config) AllowedOriginList() []string {
+	return strings.Split(c.AllowedOrigins, ",")
 }
 
 func Load() (Config, error) {
