@@ -9,6 +9,7 @@ import { useI18n } from "@/lib/i18n";
 import { imageUrl } from "@/lib/image";
 import { validatePhone, validateRequired } from "@/lib/validation";
 import { getBasket, updateQuantity, removeFromBasket, clearBasket, getBasketCount, getBasketTotal } from "@/lib/basket";
+import { getProfile } from "@/lib/profile";
 import type { Restaurant, BasketItem } from "@/lib/types";
 import styles from "./page.module.css";
 
@@ -34,6 +35,11 @@ export default function BasketPage() {
       .then(setRestaurant)
       .catch(() => {});
     setBasket(getBasket(id));
+    const p = getProfile();
+    if (p) {
+      if (p.phone) setPhone(p.phone);
+      if (p.address) setAddress(p.address);
+    }
   }, [id]);
 
   const handleQty = (foodId: string, qty: number) => {

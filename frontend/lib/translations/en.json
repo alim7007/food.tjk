@@ -119,6 +119,7 @@
     "active": "Active",
     "inactive": "Inactive",
     "userId": "User ID",
-    "courierNotice": "Courier must first register as a user. Enter the user ID."
+    "courierNotice": "Courier must first register as a user. Enter the user ID.",
+    "noProfileData": "You haven't added your address and phone yet"
   }
 }

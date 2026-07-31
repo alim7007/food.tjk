@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import tj from "./translations/tj.json";
 import ru from "./translations/ru.json";
 import en from "./translations/en.json";
@@ -22,11 +22,14 @@ const translations: Record<Lang, Record<string, string>> = {
 };
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => {
-    if (typeof window === "undefined") return "tj";
+  const [lang, setLangState] = useState<Lang>("tj");
+
+  useEffect(() => {
     const saved = localStorage.getItem("nexara_lang") as Lang;
-    return saved && ["tj", "ru", "en"].includes(saved) ? saved : "tj";
-  });
+    if (saved && ["tj", "ru", "en"].includes(saved)) {
+      setLangState(saved);
+    }
+  }, []);
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
