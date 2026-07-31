@@ -34,7 +34,7 @@ services:
       BCRYPT_COST: "${BCRYPT_COST:-12}"
       TZ: Asia/Dushanbe
     volumes:
-      - uploads:/app/uploads
+      - ./uploads:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -77,4 +77,3 @@ services:
 
 volumes:
   pgdata:
-  uploads:

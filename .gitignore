@@ -10,3 +10,4 @@ node_modules/
 .opencode/
 
 nginx/certs
+uploads/
