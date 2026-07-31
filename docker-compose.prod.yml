@@ -48,8 +48,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
-    environment:
-      NEXT_PUBLIC_API_URL: ${DOMAIN:-http://localhost}/api/v1
+      args:
+        NEXT_PUBLIC_API_URL: ${DOMAIN:-http://localhost}/api/v1
     depends_on:
       - backend
     restart: unless-stopped
