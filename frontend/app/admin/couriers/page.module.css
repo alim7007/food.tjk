@@ -15,8 +15,8 @@
 .active { background: var(--admin-success-light); color: var(--admin-success); }
 .inactive { background: var(--admin-bg); color: var(--admin-text-muted); }
 
-.modalOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.modal { background: var(--admin-surface); border-radius: var(--admin-radius); padding: 24px; max-width: 440px; width: 100%; }
+.modalOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.15s ease; }
+.modal { background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius); padding: 24px; max-width: 440px; width: 100%; animation: scaleIn 0.15s ease; }
 .modalTitle { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
 .notice { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #eff6ff; color: #2563eb; border-radius: var(--admin-radius-sm); font-size: 13px; margin-bottom: 16px; }
 .formGroup { margin-bottom: 14px; }
@@ -30,3 +30,13 @@
 
 .loading { text-align: center; padding: 48px; color: var(--admin-text-muted); }
 .empty { text-align: center; padding: 48px; color: var(--admin-text-muted); }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

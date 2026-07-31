@@ -11,19 +11,16 @@ export default function AdminDashboard() {
   const { t } = useI18n();
   const [orders, setOrders] = useState<Order[]>([]);
   const [couriers, setCouriers] = useState<Courier[]>([]);
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       fetchAllOrders(undefined, 1, 100),
       fetchCouriers(),
-      fetchRestaurants(),
     ])
-      .then(([o, c, r]) => {
+      .then(([o, c]) => {
         setOrders(o.orders);
         setCouriers(c);
-        setRestaurants(r.restaurants);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -38,10 +35,6 @@ export default function AdminDashboard() {
   const recentOrders = [...orders]
     .sort((a, b) => b.created_at.localeCompare(a.created_at))
     .slice(0, 5);
-
-  const needsAttention = orders.filter(
-    (o) => o.status === "pending" || (o.status === "accepted" && !o.courier_id)
-  );
 
   if (loading) {
     return (
@@ -77,26 +70,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {needsAttention.length > 0 && (
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>{t("site.needsAttention")}</h2>
-          <div className={styles.attentionList}>
-            {needsAttention.map((o) => (
-              <Link key={o.id} href={`/admin/orders/${o.id}`} className={styles.attentionItem}>
-                <div>
-                  <span className={styles.attentionRest}>{o.restaurant_name}</span>
-                  <span className={styles.attentionCustomer}>{o.customer_name || "Guest"}</span>
-                </div>
-                <div className={styles.attentionRight}>
-                  <span className={`${styles.statusBadge} ${styles[o.status]}`}>{t(`site.${o.status}`)}</span>
-                  <span className={styles.attentionTotal}>{o.total.toFixed(0)} TJS</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>{t("site.recentOrders")}</h2>
@@ -112,22 +85,10 @@ export default function AdminDashboard() {
               <span className={`${styles.statusBadge} ${styles[o.status]}`}>{t(`site.${o.status}`)}</span>
             </Link>
           ))}
+          {recentOrders.length === 0 && (
+            <div className={styles.empty}>{t("site.noOrders")}</div>
+          )}
         </div>
-      </div>
-
-      <div className={styles.quickActions}>
-        <Link href="/admin/restaurants" className={styles.quickBtn}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          {t("site.addRestaurant")}
-        </Link>
-        <Link href="/admin/menu" className={styles.quickBtn}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          {t("site.addFood")}
-        </Link>
-        <Link href="/admin/couriers" className={styles.quickBtn}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          {t("site.addCourier")}
-        </Link>
       </div>
     </div>
   );

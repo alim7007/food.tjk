@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import styles from "./AdminLayout.module.css";
@@ -19,7 +19,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, logout } = useAuth();
   const { t, lang, setLang } = useI18n();
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/");
+  };
 
   const isActive = (href: string) => {
     if (href === "/admin") return pathname === "/admin";
@@ -34,7 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span className={styles.logoIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
             </span>
-            Nexara Admin
+            Zudras Admin
           </Link>
         </div>
         <nav className={styles.nav}>
@@ -52,7 +58,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
         <div className={styles.sidebarFoot}>
           <span className={styles.userName}>{user?.name}</span>
-          <button className={styles.logoutBtn} onClick={() => logout()}>
+          <button className={styles.logoutBtn} onClick={handleLogout}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             <span>{t("site.logout")}</span>
           </button>

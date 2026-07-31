@@ -20,7 +20,7 @@ export default function Header() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link href="/" className={styles.logo}>
-          Nexara
+          Zudras
         </Link>
 
         <div className={styles.actions}>

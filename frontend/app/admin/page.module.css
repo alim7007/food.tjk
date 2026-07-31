@@ -3,7 +3,7 @@
 
 .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
 .metricCard { background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius); padding: 20px; display: flex; flex-direction: column; gap: 4px; }
-.metricValue { font-size: 28px; font-weight: 800; color: var(--admin-text); }
+.metricValue { font-size: 28px; font-weight: 800; color: var(--admin-primary); }
 .metricLabel { font-size: 13px; color: var(--admin-text-secondary); }
 .metricSkeleton { height: 88px; background: var(--admin-surface); border-radius: var(--admin-radius); }
 
@@ -12,16 +12,8 @@
 .sectionTitle { font-size: 16px; font-weight: 700; color: var(--admin-text); }
 .viewAll { font-size: 13px; color: var(--admin-primary); font-weight: 600; text-decoration: none; }
 
-.attentionList { display: flex; flex-direction: column; gap: 8px; }
-.attentionItem { background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit; }
-.attentionItem:hover { border-color: var(--admin-primary); }
-.attentionRest { font-weight: 600; font-size: 14px; display: block; }
-.attentionCustomer { font-size: 12px; color: var(--admin-text-secondary); }
-.attentionRight { display: flex; align-items: center; gap: 12px; }
-.attentionTotal { font-weight: 700; font-size: 14px; }
-
 .recentList { display: flex; flex-direction: column; gap: 6px; }
-.recentItem { background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit; }
+.recentItem { background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: inherit; transition: border-color 0.15s; }
 .recentItem:hover { border-color: var(--admin-primary); }
 .recentLeft { display: flex; flex-direction: column; gap: 2px; }
 .recentRest { font-weight: 600; font-size: 14px; }
@@ -29,12 +21,10 @@
 
 .statusBadge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; text-transform: uppercase; }
 .pending { background: var(--admin-warning-light); color: var(--admin-warning); }
-.accepted { background: #eff6ff; color: #2563eb; }
+.accepted { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
 .delivered { background: var(--admin-success-light); color: var(--admin-success); }
 
-.quickActions { display: flex; gap: 10px; flex-wrap: wrap; }
-.quickBtn { display: flex; align-items: center; gap: 8px; padding: 10px 18px; background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius-sm); font-size: 13px; font-weight: 600; color: var(--admin-text); text-decoration: none; }
-.quickBtn:hover { border-color: var(--admin-primary); color: var(--admin-primary); }
+.empty { text-align: center; padding: 24px; color: var(--admin-text-muted); font-size: 14px; }
 
 @media (max-width: 768px) {
   .metrics { grid-template-columns: repeat(2, 1fr); }
