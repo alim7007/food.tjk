@@ -1,271 +1,238 @@
-# Nexara Food — Server Deployment Guide
+# Nexara Food — Production Deployment Guide
 
 ## What You Need
 
 - Ubuntu 24.04 VPS (2 vCPU, 2 GB RAM minimum)
-- A domain name pointed to your server IP (optional, but recommended)
-- SSH access to the server
+- A domain name with SSL certificate files (`.pem` and `.key`)
+- SSH key access to the server
 
 ---
 
-## 1. Server Setup (First Time Only)
+## 1. Server Hardening
 
-SSH into your server and run these commands one by one:
+SSH into the server as root, then:
 
 ```bash
-# Update system
+# Create your user
+adduser alim
+usermod -aG sudo alim
+
+# Copy SSH keys from root to your user
+rsync --archive --chown=alim:alim /root/.ssh /home/alim
+
+# Disable root login and password auth
+sudo tee /etc/ssh/sshd_config.d/99-hardening.conf > /dev/null <<'EOF'
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+EOF
+
+sudo sshd -t
+sudo systemctl reload ssh
+```
+
+Log out and SSH back in as `alim`.
+
+---
+
+## 2. Install Docker
+
+```bash
 sudo apt update && sudo apt upgrade -y
+sudo apt install -y ca-certificates curl git openssl unattended-upgrades
+sudo systemctl enable --now unattended-upgrades
 
-# Install Docker
-curl -fsSL https://get.docker.com | sudo sh
-sudo usermod -aG docker $USER
+# Remove old Docker packages if any
+for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do
+  sudo apt remove -y "$pkg" 2>/dev/null || true
+done
 
-# Install git (usually already there)
-sudo apt install git -y
+# Add Docker's official repo
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-# Log out and back in for docker group to take effect
-exit
+sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: noble
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo systemctl enable --now docker
+
+# Add your user to docker group
+sudo usermod -aG docker alim
 ```
 
-SSH back in, then verify:
+Log out and back in for the group to take effect.
+
+---
+
+## 3. Configure Docker Log Rotation
 
 ```bash
-docker --version
-# Should show: Docker version 27.x.x
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json > /dev/null <<'EOF'
+{
+  "log-driver": "local",
+  "log-opts": {
+    "max-size": "20m",
+    "max-file": "5"
+  }
+}
+EOF
+
+sudo systemctl restart docker
+docker info --format '{{.LoggingDriver}}'
+# Should print: local
 ```
 
 ---
 
-## 2. Firewall
+## 4. Firewall
 
 ```bash
-sudo ufw allow 22/tcp    # SSH
-sudo ufw allow 80/tcp    # HTTP
-sudo ufw allow 443/tcp   # HTTPS
+sudo ufw allow OpenSSH
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
 sudo ufw enable
-sudo ufw status
+sudo ufw status verbose
 ```
 
 ---
 
-## 3. Clone the Project
+## 5. Clone the Project
 
 ```bash
-git clone <your-repo-url> /opt/nexara
-cd /opt/nexara
+# Generate a deploy key for GitHub
+ssh-keygen -t ed25519 -C "nexara-production-server" -f ~/.ssh/nexara_github
+cat ~/.ssh/nexara_github.pub
+```
+
+Add the public key to your GitHub repo: **Settings → Deploy keys → Add deploy key** (check "Allow write access" if you push from the server).
+
+```bash
+# Configure SSH to use the deploy key
+cat >> ~/.ssh/config <<'EOF'
+Host github-nexara
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/nexara_github
+  IdentitiesOnly yes
+EOF
+
+chmod 600 ~/.ssh/config
+chmod 600 ~/.ssh/nexara_github
+chmod 644 ~/.ssh/nexara_github.pub
+
+# Clone
+git clone git@github-nexara:alim7007/food.tjk.git nexara
+cd nexara
 ```
 
 ---
 
-## 4. Create Production Config
+## 6. Create Production Config
 
 ```bash
 cp .env.prod.example .env.prod
-```
-
-Now edit `.env.prod` with real values:
-
-```bash
 nano .env.prod
 ```
 
-Replace the placeholders:
+Fill in real values:
 
 ```
 DB_USER=nexara
-DB_PASSWORD=YOUR_STRONG_DB_PASSWORD_HERE
+DB_PASSWORD=<strong-password>
 DB_NAME=nexara_food
-JWT_SECRET=YOUR_RANDOM_64_CHAR_SECRET_HERE
+JWT_SECRET=<output-of-openssl-rand-hex-64>
 JWT_EXPIRY_MINUTES=60
 JWT_REFRESH_EXPIRY_DAYS=7
 BCRYPT_COST=12
-DOMAIN=http://your-domain.com
+DOMAIN=https://nexaraandme.com
+DOMAIN_WWW=https://www.nexaraandme.com
 ```
 
-**How to generate a strong JWT secret:**
+Generate secrets:
 
 ```bash
-openssl rand -hex 64
-```
-
-Copy the output and paste it as `JWT_SECRET`.
-
-**How to generate a strong DB password:**
-
-```bash
-openssl rand -base64 24
+openssl rand -hex 64   # for JWT_SECRET
+openssl rand -base64 24  # for DB_PASSWORD
 ```
 
 ---
 
-## 5. Start the App
+## 7. SSL Certificates
+
+Place your SSL certificate and key in `nginx/certs/`:
 
 ```bash
-make up-prod
+mkdir -p nginx/certs
+
+# Copy your certificate and key files
+# (these are gitignored — never committed to the repo)
+
+chmod 644 nginx/certs/origin.pem
+chmod 600 nginx/certs/origin.key
 ```
 
-This builds and starts 4 containers:
-- PostgreSQL (database)
-- Go backend (API)
-- Next.js frontend (UI)
-- Nginx (reverse proxy)
+Update `nginx/nginx.conf` with your domain name:
 
-Wait 2-3 minutes for the first build. Then run migrations and seed data:
+```nginx
+server_name nexaraandme.com www.nexaraandme.com;
+```
+
+---
+
+## 8. Start the App
 
 ```bash
+# Install make if not present
+sudo apt install make -y
+
+# Build and start
+make up-prod
+
+# Run database migrations
 make migrate-prod
+
+# Seed initial data (restaurants, foods, users)
 make seed-prod
 ```
 
----
-
-## 6. Verify It Works
+Verify:
 
 ```bash
-# Check all containers are running
 docker ps
+# Should show 4 containers: postgres, backend, frontend, nginx
 
-# Test the API
-curl http://localhost/api/v1/health
+curl -I http://localhost
+# Should return 301 redirect to HTTPS
 
-# Open in browser
-# http://<your-server-ip>
+curl -kI --resolve nexaraandme.com:443:127.0.0.1 https://nexaraandme.com
+# Should return 200
 ```
+
+Open `https://nexaraandme.com` in your browser.
 
 **Default admin login:**
 - Email: `admin@nexara.com`
 - Password: `pass1234`
 
-**Change the admin password immediately** after first login.
-
----
-
-## 7. SSL / HTTPS (Recommended)
-
-Install Certbot and get a free Let's Encrypt certificate:
-
-```bash
-sudo apt install certbot -y
-sudo certbot certonly --standalone -d your-domain.com
-```
-
-Then update nginx config to use SSL. Create `/opt/nexara/nginx/nginx.conf` with:
-
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    server_name your-domain.com;
-
-    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
-
-    client_max_body_size 10M;
-
-    gzip on;
-    gzip_types text/plain text/css application/json application/javascript text/xml application/xml text/javascript image/svg+xml;
-    gzip_min_length 256;
-    gzip_vary on;
-
-    location /api/ {
-        proxy_pass http://backend:8080;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location /uploads/ {
-        proxy_pass http://backend:8080;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    location /_next/static/ {
-        proxy_pass http://frontend:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        expires 365d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    location / {
-        proxy_pass http://frontend:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-Then update `.env.prod`:
-
-```
-DOMAIN=https://your-domain.com
-```
-
-And mount the certs in `docker-compose.prod.yml` under nginx:
-
-```yaml
-nginx:
-  volumes:
-    - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    - /etc/letsencrypt:/etc/letsencrypt:ro
-```
-
-Restart:
-
-```bash
-make up-prod
-```
-
-**Auto-renew SSL cert:**
-
-```bash
-sudo crontab -e
-# Add this line:
-0 3 * * * certbot renew --quiet && cd /opt/nexara && docker compose -f docker-compose.prod.yml restart nginx
-```
-
----
-
-## 8. Daily Commands
-
-```bash
-# View logs
-make logs
-
-# Check container status
-docker ps
-
-# Restart everything
-make down-prod && make up-prod
-```
+Change the admin password immediately.
 
 ---
 
 ## 9. Deploying Updates
 
-When you push new code to the repo:
-
 ```bash
-cd /opt/nexara
+cd ~/nexara
 git pull
 
 # Backend changes only
@@ -278,60 +245,90 @@ make update-prod-frontend
 make migrate-prod
 ```
 
-**Data is never lost.** Database and uploaded images live in Docker volumes, not inside containers.
+**Data is never lost.** Database and uploaded images live in Docker volumes (`pgdata`, `uploads`), not inside containers.
 
 ---
 
 ## 10. Database Backup
 
-Create a backup script:
-
 ```bash
-nano /opt/nexara/backup.sh
+nano ~/nexara/backup.sh
 ```
 
 ```bash
 #!/bin/bash
-BACKUP_DIR=/opt/nexara/backups
+BACKUP_DIR=/home/alim/nexara/backups
 mkdir -p $BACKUP_DIR
 FILE="$BACKUP_DIR/nexara_$(date +%Y%m%d_%H%M%S).sql.gz"
 
-docker compose -f /opt/nexara/docker-compose.prod.yml \
+docker compose -f /home/alim/nexara/docker-compose.prod.yml \
   exec -T postgres pg_dump -U nexara nexara_food | gzip > $FILE
 
-# Keep only last 7 backups
 ls -t $BACKUP_DIR/*.sql.gz | tail -n +8 | xargs -r rm
-
 echo "Backup saved: $FILE"
 ```
 
 ```bash
-chmod +x /opt/nexara/backup.sh
-```
-
-Run daily at 2 AM:
-
-```bash
+chmod +x ~/nexara/backup.sh
 crontab -e
-# Add:
-0 2 * * * /opt/nexara/backup.sh
-```
-
-To restore a backup:
-
-```bash
-gunzip -c /opt/nexara/backups/nexara_20260101_020000.sql.gz | \
-  docker compose -f /opt/nexara/docker-compose.prod.yml exec -T postgres psql -U nexara nexara_food
+# Add: 0 2 * * * /home/alim/nexara/backup.sh
 ```
 
 ---
 
-## 11. Troubleshooting
+## 11. Quick Reference
+
+```
+make up-prod               Start production
+make down-prod             Stop production
+make update-prod-backend   Deploy backend changes
+make update-prod-frontend  Deploy frontend changes
+make migrate-prod          Run new migrations
+make seed-prod             Re-seed database
+make logs                  View all container logs
+docker ps                  List running containers
+```
+
+---
+
+## 12. Files Never Committed to Git
+
+These are in `.gitignore` — they exist only on the server:
+
+```
+.env.prod           Production secrets (DB password, JWT secret)
+nginx/certs/        SSL certificate and private key
+```
+
+---
+
+## 13. Architecture
+
+```
+Browser (HTTPS)
+    │
+    ▼
+nginx :443 (SSL termination)
+    │
+    ├── /api/*      → backend:8080  (Go API)
+    ├── /uploads/*  → backend:8080  (images)
+    └── /*          → frontend:3000 (Next.js)
+                        │
+                        ▼
+                   backend:8080
+                        │
+                        ▼
+                   postgres:5432
+```
+
+---
+
+## 14. Troubleshooting
 
 **"port 80 already in use"**
 ```bash
 sudo lsof -i :80
-sudo systemctl stop apache2 nginx  # if another web server is running
+sudo systemctl stop apache2 nginx
 ```
 
 **"Cannot connect to database"**
@@ -339,57 +336,16 @@ sudo systemctl stop apache2 nginx  # if another web server is running
 docker compose -f docker-compose.prod.yml logs postgres
 ```
 
-**"Build failed — out of memory"**
-```bash
-# Add swap
-sudo fallocate -l 2G /swapfile
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-```
-
 **"Permission denied" on docker commands**
 ```bash
-sudo usermod -aG docker $USER
+sudo usermod -aG docker alim
 # Log out and back in
 ```
 
 **Reset everything (DESTROYS ALL DATA)**
 ```bash
-cd /opt/nexara
 docker compose -f docker-compose.prod.yml down -v
 make up-prod
 make migrate-prod
 make seed-prod
-```
-
----
-
-## 12. Resource Usage
-
-```
-SERVICE       RAM      CPU
-PostgreSQL    150MB    idle
-Go backend    30MB     idle
-Next.js       120MB    idle
-Nginx         10MB     idle
-─────────────────────────
-TOTAL         ~310MB   idle
-```
-
-A 2 GB VPS is comfortable. 4 GB gives room for growth.
-
----
-
-## Quick Reference Card
-
-```
-make up-prod              Start production
-make down-prod            Stop production
-make update-prod-backend  Deploy backend changes
-make update-prod-frontend Deploy frontend changes
-make migrate-prod         Run new migrations
-make seed-prod            Re-seed database
-make logs                 View all logs
-docker ps                 List running containers
 ```
