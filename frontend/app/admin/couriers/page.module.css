@@ -1,0 +1,32 @@
+.page { max-width: 1100px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.pageTitle { font-size: 22px; font-weight: 800; color: var(--admin-text); }
+.addBtn { display: flex; align-items: center; gap: 6px; padding: 10px 18px; background: var(--admin-primary); color: #fff; border-radius: var(--admin-radius-sm); font-size: 14px; font-weight: 600; }
+.search { width: 100%; padding: 10px 14px; border: 1px solid var(--admin-border); border-radius: var(--admin-radius-sm); font-size: 14px; color: var(--admin-text); background: var(--admin-surface); outline: none; margin-bottom: 20px; }
+.search:focus { border-color: var(--admin-primary); }
+
+.list { display: flex; flex-direction: column; gap: 8px; }
+.card { background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: var(--admin-radius); padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+.avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--admin-primary-light); color: var(--admin-primary); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; flex-shrink: 0; }
+.cardBody { flex: 1; min-width: 0; }
+.cardName { font-size: 15px; font-weight: 700; }
+.cardPhone { font-size: 13px; color: var(--admin-text-secondary); }
+.statusBadge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
+.active { background: var(--admin-success-light); color: var(--admin-success); }
+.inactive { background: var(--admin-bg); color: var(--admin-text-muted); }
+
+.modalOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal { background: var(--admin-surface); border-radius: var(--admin-radius); padding: 24px; max-width: 440px; width: 100%; }
+.modalTitle { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+.notice { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #eff6ff; color: #2563eb; border-radius: var(--admin-radius-sm); font-size: 13px; margin-bottom: 16px; }
+.formGroup { margin-bottom: 14px; }
+.label { display: block; font-size: 13px; font-weight: 600; color: var(--admin-text-secondary); margin-bottom: 6px; }
+.input { width: 100%; padding: 10px 12px; border: 1px solid var(--admin-border); border-radius: var(--admin-radius-sm); font-size: 14px; color: var(--admin-text); background: var(--admin-bg); outline: none; }
+.input:focus { border-color: var(--admin-primary); }
+.modalActions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+.cancelBtn { padding: 10px 20px; border: 1px solid var(--admin-border); border-radius: var(--admin-radius-sm); font-size: 14px; font-weight: 600; color: var(--admin-text-secondary); background: var(--admin-surface); }
+.saveBtn { padding: 10px 20px; background: var(--admin-primary); color: #fff; border-radius: var(--admin-radius-sm); font-size: 14px; font-weight: 600; }
+.saveBtn:disabled { opacity: 0.5; }
+
+.loading { text-align: center; padding: 48px; color: var(--admin-text-muted); }
+.empty { text-align: center; padding: 48px; color: var(--admin-text-muted); }

@@ -1,0 +1,45 @@
+.container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 360px;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--admin-radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  animation: slideIn 0.2s ease;
+}
+
+.success {
+  background: var(--admin-success-light);
+  color: var(--admin-success);
+  border: 1px solid rgba(22, 163, 74, 0.2);
+}
+
+.error {
+  background: var(--admin-error-light);
+  color: var(--admin-error);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.info {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+@keyframes slideIn {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
