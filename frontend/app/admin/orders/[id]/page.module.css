@@ -10,6 +10,7 @@
 .pending { background: var(--admin-warning-light); color: var(--admin-warning); }
 .accepted { background: #eff6ff; color: #2563eb; }
 .delivered { background: var(--admin-success-light); color: var(--admin-success); }
+.cancelled { background: rgba(239, 68, 68, 0.1); color: var(--admin-error); }
 
 .grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
 .mainCol { display: flex; flex-direction: column; gap: 16px; }
@@ -39,6 +40,8 @@
 .actions { display: flex; flex-direction: column; gap: 8px; }
 .actionBtn { width: 100%; padding: 12px; background: var(--admin-primary); color: #fff; border-radius: var(--admin-radius-sm); font-size: 14px; font-weight: 700; }
 .actionBtn:disabled { opacity: 0.5; }
+.cancelBtn { width: 100%; padding: 12px; background: transparent; color: var(--admin-error); border: 1px solid var(--admin-error); border-radius: var(--admin-radius-sm); font-size: 14px; font-weight: 600; }
+.cancelBtn:disabled { opacity: 0.5; }
 .assignSelect { width: 100%; padding: 12px; border: 1px solid var(--admin-border); border-radius: var(--admin-radius-sm); font-size: 14px; background: var(--admin-surface); color: var(--admin-text); }
 
 .loading { text-align: center; padding: 64px; color: var(--admin-text-muted); }

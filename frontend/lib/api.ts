@@ -141,6 +141,10 @@ export async function updateOrderStatus(orderId: string, status: string): Promis
   return request(`/admin/orders/${orderId}/status`, { method: "PUT", body: JSON.stringify({ status }) });
 }
 
+export async function cancelOrder(orderId: string): Promise<{ status: string }> {
+  return request(`/admin/orders/${orderId}/status`, { method: "PUT", body: JSON.stringify({ status: "cancelled" }) });
+}
+
 export async function assignCourier(orderId: string, courierId: string): Promise<{ message: string }> {
   return request(`/admin/orders/${orderId}/assign`, { method: "PUT", body: JSON.stringify({ courier_id: courierId }) });
 }

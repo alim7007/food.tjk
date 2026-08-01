@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchOrderById, updateOrderStatus, assignCourier, fetchCouriers } from "@/lib/api";
+import { fetchOrderById, updateOrderStatus, cancelOrder, assignCourier, fetchCouriers } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/components/admin/Toast";
 import type { Order, Courier } from "@/lib/types";
@@ -31,7 +31,11 @@ export default function AdminOrderDetailPage() {
     if (!order) return;
     setActionLoading(status);
     try {
-      await updateOrderStatus(order.id, status);
+      if (status === "cancelled") {
+        await cancelOrder(order.id);
+      } else {
+        await updateOrderStatus(order.id, status);
+      }
       setOrder({ ...order, status });
       toast(t("site.statusUpdated"), "success");
     } catch {
@@ -60,7 +64,7 @@ export default function AdminOrderDetailPage() {
   if (!order) return <div className={styles.error}>{t("site.notFound")}</div>;
 
   const statusSteps = ["pending", "accepted", "delivered"];
-  const currentStep = statusSteps.indexOf(order.status);
+  const currentStep = order.status === "cancelled" ? -1 : statusSteps.indexOf(order.status);
 
   return (
     <div className={styles.page}>
@@ -154,6 +158,11 @@ export default function AdminOrderDetailPage() {
             {order.status === "accepted" && order.courier_id && (
               <button className={styles.actionBtn} onClick={() => handleStatus("delivered")} disabled={!!actionLoading}>
                 {actionLoading === "delivered" ? "..." : t("site.markDelivered")}
+              </button>
+            )}
+            {order.status !== "delivered" && order.status !== "cancelled" && (
+              <button className={styles.cancelBtn} onClick={() => handleStatus("cancelled")} disabled={!!actionLoading}>
+                {actionLoading === "cancelled" ? "..." : t("site.cancelOrder")}
               </button>
             )}
           </div>

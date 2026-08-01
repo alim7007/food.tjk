@@ -7,7 +7,7 @@ import { useI18n } from "@/lib/i18n";
 import type { Order } from "@/lib/types";
 import styles from "./page.module.css";
 
-const STATUSES = ["", "pending", "accepted", "delivered"];
+const STATUSES = ["", "pending", "accepted", "delivered", "cancelled"];
 
 export default function AdminOrdersPage() {
   const { t } = useI18n();

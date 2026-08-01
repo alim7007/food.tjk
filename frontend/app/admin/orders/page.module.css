@@ -23,6 +23,7 @@
 .pending { background: var(--admin-warning-light); color: var(--admin-warning); }
 .accepted { background: #eff6ff; color: #2563eb; }
 .delivered { background: var(--admin-success-light); color: var(--admin-success); }
+.cancelled { background: rgba(239, 68, 68, 0.1); color: var(--admin-error); }
 
 .detailBtn { font-size: 13px; color: var(--admin-primary); font-weight: 600; text-decoration: none; white-space: nowrap; }
 .detailBtn:hover { text-decoration: underline; }

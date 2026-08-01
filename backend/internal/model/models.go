@@ -109,10 +109,11 @@ type OrderItem struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
-var ValidOrderStatuses = []string{"pending", "accepted", "delivered"}
+var ValidOrderStatuses = []string{"pending", "accepted", "delivered", "cancelled"}
 
 var AllowedTransitions = map[string][]string{
-	"pending":   {"accepted"},
+	"pending":   {"accepted", "cancelled"},
 	"accepted":  {"delivered"},
 	"delivered": {},
+	"cancelled": {},
 }

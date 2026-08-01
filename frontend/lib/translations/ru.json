@@ -30,6 +30,8 @@
     "pending": "Ожидание",
     "accepted": "Принят",
     "delivered": "Доставлен",
+    "cancelled": "Отменён",
+    "cancelOrder": "Отменить заказ",
     "accept": "Принять",
     "markDelivered": "Доставлен",
     "assignCourier": "Назначить курьера",

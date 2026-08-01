@@ -80,6 +80,11 @@ sudo tee /etc/docker/daemon.json > /dev/null <<'EOF'
 EOF
 
 sudo systemctl restart docker
+
+docker info --format '{{.LoggingDriver}}'
+## if not works newgrp docker
+
+ 
 ```
 
 ---

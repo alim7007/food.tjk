@@ -78,11 +78,6 @@ export default function Header() {
 
           {user ? (
             <>
-              {user.role === "customer" && (
-                <Link href="/orders" className={styles.navLink}>
-                  {t("site.myOrders")}
-                </Link>
-              )}
               {user.role === "admin" && (
                 <Link href="/admin" className={styles.navLink}>
                   {t("site.admin")}

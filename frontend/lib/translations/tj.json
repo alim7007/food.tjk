@@ -30,6 +30,8 @@
     "pending": "Интизорӣ",
     "accepted": "Қабулшуда",
     "delivered": "Расонидашуда",
+    "cancelled": "Бекоршуда",
+    "cancelOrder": "Бекор кардани фармоиш",
     "accept": "Қабул кардан",
     "markDelivered": "Расонидашуда",
     "assignCourier": "Курьер таъин кунед",

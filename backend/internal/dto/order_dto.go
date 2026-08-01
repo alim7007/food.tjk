@@ -24,7 +24,7 @@ type CreateOrderResponse struct {
 }
 
 type UpdateOrderStatusRequest struct {
-	Status string `json:"status" validate:"required,oneof=accepted delivered"`
+	Status string `json:"status" validate:"required,oneof=accepted delivered cancelled"`
 }
 
 type AssignCourierRequest struct {

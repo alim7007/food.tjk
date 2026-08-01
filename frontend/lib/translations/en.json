@@ -30,6 +30,8 @@
     "pending": "Pending",
     "accepted": "Accepted",
     "delivered": "Delivered",
+    "cancelled": "Cancelled",
+    "cancelOrder": "Cancel order",
     "accept": "Accept",
     "markDelivered": "Mark Delivered",
     "assignCourier": "Assign courier",

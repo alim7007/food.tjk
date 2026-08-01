@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Header from "@/components/layout/Header";
 import Container from "@/components/layout/Container";
-import { fetchOrderById } from "@/lib/api";
+import { fetchOrderById, cancelOrder } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 import type { Order } from "@/lib/types";
 import styles from "./page.module.css";
@@ -17,6 +17,7 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -25,6 +26,19 @@ export default function OrderDetailPage() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [id]);
+
+  const handleCancel = async () => {
+    if (!order) return;
+    setCancelling(true);
+    try {
+      await cancelOrder(order.id);
+      setOrder({ ...order, status: "cancelled" });
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   if (loading) return <><Header /><Container><div className={styles.loading}>{t("site.loading")}</div></Container></>;
   if (error) return <><Header /><Container><div className={styles.error}>{error}</div></Container></>;
@@ -62,6 +76,12 @@ export default function OrderDetailPage() {
           {order.note && <div className={styles.row}><span>{t("site.note")}</span><span>{order.note}</span></div>}
           {order.courier_name && <div className={styles.row}><span>{t("site.courier")}</span><span>{order.courier_name} ({order.courier_phone})</span></div>}
         </div>
+
+        {order.status === "pending" && (
+          <button className={styles.cancelBtn} onClick={handleCancel} disabled={cancelling}>
+            {cancelling ? "..." : t("site.cancelOrder")}
+          </button>
+        )}
       </Container>
     </>
   );

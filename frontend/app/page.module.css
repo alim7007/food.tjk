@@ -15,6 +15,12 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  text-align: left;
+  font-family: inherit;
+  padding: 0;
 }
 
 .deliveryLabel {
@@ -232,4 +238,67 @@
   .grid {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+.addressModal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 20px;
+  animation: fadeIn 0.15s ease;
+}
+
+.addressModalTitle {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.addressInput {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--color-text);
+  outline: none;
+  margin-bottom: 10px;
+}
+
+.addressInput:focus {
+  border-color: var(--color-primary);
+}
+
+.addressActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.addressCancel {
+  padding: 8px 18px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+}
+
+.addressSave {
+  padding: 8px 18px;
+  background: var(--color-primary);
+  color: #000;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.addressSave:disabled {
+  opacity: 0.5;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

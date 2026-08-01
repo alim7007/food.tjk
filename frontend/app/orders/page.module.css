@@ -10,6 +10,7 @@
 .pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
 .accepted { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
 .delivered { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+.cancelled { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
 .cardBody { display: flex; justify-content: space-between; font-size: 14px; color: var(--color-text-secondary); margin-bottom: 4px; }
 .total { font-weight: 700; color: var(--color-text); }
 .cardFooter { font-size: 12px; color: var(--color-text-muted); }

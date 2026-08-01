@@ -4,23 +4,32 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import { fetchRestaurants, fetchCategories } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import { imageUrl } from "@/lib/image";
+import { getProfile, saveProfile, type UserProfile } from "@/lib/profile";
 import { SkeletonCard } from "@/components/ui/Skeleton";
 import type { Restaurant, Category } from "@/lib/types";
 import styles from "./page.module.css";
 
 export default function HomePage() {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState("");
   const [activeCat, setActiveCat] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [addrPhone, setAddrPhone] = useState("");
+  const [addrAddress, setAddrAddress] = useState("");
+  const [addrSaving, setAddrSaving] = useState(false);
 
   useEffect(() => {
     fetchCategories().then(setCategories).catch(() => {});
+    setProfile(getProfile());
   }, []);
 
   useEffect(() => {
@@ -30,6 +39,22 @@ export default function HomePage() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [search]);
+
+  const openAddressForm = () => {
+    const p = getProfile();
+    setAddrPhone(p?.phone || "");
+    setAddrAddress(p?.address || "");
+    setShowAddressForm(true);
+  };
+
+  const handleSaveAddress = () => {
+    setAddrSaving(true);
+    const p: UserProfile = { phone: addrPhone.trim(), address: addrAddress.trim() };
+    saveProfile(p);
+    setProfile(p);
+    setShowAddressForm(false);
+    setAddrSaving(false);
+  };
 
   const filtered = activeCat
     ? restaurants.filter((r) => {
@@ -42,17 +67,47 @@ export default function HomePage() {
       <Header />
       <div className={styles.page}>
         <div className={styles.deliveryBar}>
-          <div className={styles.deliveryInfo}>
+          <button className={styles.deliveryInfo} onClick={openAddressForm}>
             <span className={styles.deliveryLabel}>{t("site.deliveringTo")}</span>
             <span className={styles.deliveryAddress}>
-              {t("site.addAddress")}
+              {profile?.address || t("site.addAddress")}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </span>
-          </div>
-          <Link href="/orders" className={styles.profileBtn}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </Link>
+          </button>
+          {user ? (
+            <button className={styles.profileBtn} onClick={() => {}}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </button>
+          ) : (
+            <Link href="/login" className={styles.profileBtn}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </Link>
+          )}
         </div>
+
+        {showAddressForm && (
+          <div className={styles.addressModal}>
+            <h3 className={styles.addressModalTitle}>{t("site.deliveryAddress")}</h3>
+            <input
+              className={styles.addressInput}
+              placeholder={t("site.phoneNumber")}
+              value={addrPhone}
+              onChange={(e) => setAddrPhone(e.target.value)}
+            />
+            <input
+              className={styles.addressInput}
+              placeholder={t("site.deliveryAddress")}
+              value={addrAddress}
+              onChange={(e) => setAddrAddress(e.target.value)}
+            />
+            <div className={styles.addressActions}>
+              <button className={styles.addressCancel} onClick={() => setShowAddressForm(false)}>{t("site.cancel")}</button>
+              <button className={styles.addressSave} onClick={handleSaveAddress} disabled={addrSaving}>
+                {addrSaving ? "..." : t("site.save")}
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className={styles.searchWrap}>
           <svg className={styles.searchIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
