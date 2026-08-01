@@ -113,7 +113,7 @@ var ValidOrderStatuses = []string{"pending", "accepted", "delivered", "cancelled
 
 var AllowedTransitions = map[string][]string{
 	"pending":   {"accepted", "cancelled"},
-	"accepted":  {"delivered"},
+	"accepted":  {"delivered", "cancelled"},
 	"delivered": {},
 	"cancelled": {},
 }
