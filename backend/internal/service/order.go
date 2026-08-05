@@ -8,6 +8,7 @@ import (
 
 	"nexara.food/internal/model"
 	"nexara.food/internal/repository"
+	"nexara.food/internal/sse"
 )
 
 type OrderService struct {
@@ -15,10 +16,15 @@ type OrderService struct {
 	foodRepo    repository.FoodRepository
 	userRepo    repository.UserRepository
 	courierRepo repository.CourierRepository
+	sseHub      *sse.Hub
 }
 
 func NewOrderService(orderRepo repository.OrderRepository, foodRepo repository.FoodRepository, userRepo repository.UserRepository, courierRepo repository.CourierRepository) *OrderService {
 	return &OrderService{orderRepo: orderRepo, foodRepo: foodRepo, userRepo: userRepo, courierRepo: courierRepo}
+}
+
+func (s *OrderService) SetSSEHub(hub *sse.Hub) {
+	s.sseHub = hub
 }
 
 type CreateOrderInput struct {
@@ -104,7 +110,21 @@ func (s *OrderService) Create(ctx context.Context, input CreateOrderInput) (*mod
 		Note:            input.Note,
 	}
 
-	return s.orderRepo.Create(ctx, order, orderItems)
+	var createErr error
+	order, createErr = s.orderRepo.Create(ctx, order, orderItems)
+	if createErr != nil {
+		return nil, createErr
+	}
+
+	if s.sseHub != nil {
+		s.sseHub.Broadcast(sse.Event{
+			Type:    "new_order",
+			OrderID: order.ID.String(),
+			Total:   fmt.Sprintf("%.0f", order.Total),
+		})
+	}
+
+	return order, nil
 }
 
 func (s *OrderService) GetByID(ctx context.Context, id string) (*model.Order, error) {

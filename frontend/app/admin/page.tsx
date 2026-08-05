@@ -2,18 +2,21 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { fetchAllOrders, fetchCouriers, fetchRestaurants } from "@/lib/api";
+import { fetchAllOrders, fetchCouriers } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
-import type { Order, Courier, Restaurant } from "@/lib/types";
+import { useSSEVersion } from "@/components/admin/AdminLayout";
+import type { Order, Courier } from "@/lib/types";
 import styles from "./page.module.css";
 
 export default function AdminDashboard() {
   const { t } = useI18n();
+  const sseVersion = useSSEVersion();
   const [orders, setOrders] = useState<Order[]>([]);
   const [couriers, setCouriers] = useState<Courier[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     Promise.all([
       fetchAllOrders(undefined, 1, 100),
       fetchCouriers(),
@@ -24,7 +27,7 @@ export default function AdminDashboard() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [sseVersion]);
 
   const pendingOrders = orders.filter((o) => o.status === "pending");
   const today = new Date().toISOString().split("T")[0];

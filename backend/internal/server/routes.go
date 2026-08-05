@@ -14,6 +14,7 @@ import (
 	"nexara.food/internal/pkg/middleware"
 	"nexara.food/internal/repository"
 	"nexara.food/internal/service"
+	"nexara.food/internal/sse"
 )
 
 func NewRouter(pool *pgxpool.Pool, cfg config.Config) http.Handler {
@@ -23,7 +24,6 @@ func NewRouter(pool *pgxpool.Pool, cfg config.Config) http.Handler {
 	r.Use(chimiddleware.RealIP)
 	r.Use(chimiddleware.Logger)
 	r.Use(chimiddleware.Recoverer)
-	r.Use(chimiddleware.Timeout(30 * time.Second))
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   cfg.AllowedOriginList(),
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -46,6 +46,9 @@ func NewRouter(pool *pgxpool.Pool, cfg config.Config) http.Handler {
 	orderSvc := service.NewOrderService(orderRepo, foodRepo, userRepo, courierRepo)
 	courierSvc := service.NewCourierService(courierRepo)
 
+	sseHub := sse.NewHub()
+	orderSvc.SetSSEHub(sseHub)
+
 	healthH := handler.NewHealthHandler()
 	authH := handler.NewAuthHandler(authSvc)
 	restaurantH := handler.NewRestaurantHandler(restaurantSvc)
@@ -54,6 +57,7 @@ func NewRouter(pool *pgxpool.Pool, cfg config.Config) http.Handler {
 	orderH := handler.NewOrderHandler(orderSvc)
 	courierH := handler.NewCourierHandler(courierSvc)
 	uploadH := handler.NewUploadHandler()
+	sseH := handler.NewSSEHandler(sseHub)
 
 	r.Get("/uploads/*", uploadH.ServeUpload)
 
@@ -73,6 +77,7 @@ func NewRouter(pool *pgxpool.Pool, cfg config.Config) http.Handler {
 		r.With(middleware.OptionalAuth(cfg.JWTSecret)).Post("/orders", orderH.Create)
 
 		r.Group(func(r chi.Router) {
+			r.Use(chimiddleware.Timeout(30 * time.Second))
 			r.Use(middleware.RequireAuth(cfg.JWTSecret))
 
 			r.Get("/orders", orderH.ListMyOrders)
@@ -80,6 +85,7 @@ func NewRouter(pool *pgxpool.Pool, cfg config.Config) http.Handler {
 		})
 
 		r.Group(func(r chi.Router) {
+			r.Use(chimiddleware.Timeout(30 * time.Second))
 			r.Use(middleware.RequireAuth(cfg.JWTSecret))
 			r.Use(middleware.RequireRole("admin"))
 
@@ -102,6 +108,14 @@ func NewRouter(pool *pgxpool.Pool, cfg config.Config) http.Handler {
 		})
 
 		r.Group(func(r chi.Router) {
+			r.Use(middleware.RequireAuth(cfg.JWTSecret))
+			r.Use(middleware.RequireRole("admin"))
+
+			r.Get("/admin/orders/events", sseH.OrderEvents)
+		})
+
+		r.Group(func(r chi.Router) {
+			r.Use(chimiddleware.Timeout(30 * time.Second))
 			r.Use(middleware.RequireAuth(cfg.JWTSecret))
 			r.Use(middleware.RequireRole("courier"))
 

@@ -1,11 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, createContext, useContext, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
+import { useToast } from "@/components/admin/Toast";
 import styles from "./AdminLayout.module.css";
+
+const SSEContext = createContext<number>(0);
+
+export function useSSEVersion() {
+  return useContext(SSEContext);
+}
 
 const navItems = [
   { href: "/admin", label: "overview", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
@@ -18,9 +25,35 @@ const navItems = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const { t, lang, setLang } = useI18n();
+  const { toast } = useToast();
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sseVersion, setSSEVersion] = useState(0);
+  const esRef = useRef<EventSource | null>(null);
+
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
+    const base = apiUrl.replace(/\/api\/v1$/, "");
+    const es = new EventSource(`${base}/api/v1/admin/orders/events`, { withCredentials: true });
+    esRef.current = es;
+
+    es.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === "new_order") {
+          toast(`Новый заказ #${data.order_id.slice(0, 8)}`, "info");
+          setSSEVersion((v) => v + 1);
+        }
+      } catch {}
+    };
+
+    es.onerror = () => {};
+
+    return () => {
+      es.close();
+    };
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -33,57 +66,59 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className={styles.shell}>
-      <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}>
-        <div className={styles.sidebarHead}>
-          <Link href="/" className={styles.logo}>
-            <span className={styles.logoIcon}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-            </span>
-            Zudras Admin
-          </Link>
-        </div>
-        <nav className={styles.nav}>
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`${styles.navItem} ${isActive(item.href) ? styles.navActive : ""}`}
-              onClick={() => setSidebarOpen(false)}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={item.icon}/></svg>
-              <span>{t(`site.${item.label}`)}</span>
+    <SSEContext.Provider value={sseVersion}>
+      <div className={styles.shell}>
+        <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}>
+          <div className={styles.sidebarHead}>
+            <Link href="/" className={styles.logo}>
+              <span className={styles.logoIcon}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+              </span>
+              Zudras Admin
             </Link>
-          ))}
-        </nav>
-        <div className={styles.sidebarFoot}>
-          <span className={styles.userName}>{user?.name}</span>
-          <button className={styles.logoutBtn} onClick={handleLogout}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            <span>{t("site.logout")}</span>
-          </button>
-        </div>
-      </aside>
-
-      {sidebarOpen && <div className={styles.overlay} onClick={() => setSidebarOpen(false)} />}
-
-      <div className={styles.main}>
-        <header className={styles.topbar}>
-          <button className={styles.menuBtn} onClick={() => setSidebarOpen(true)}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
-          <div className={styles.topbarRight}>
-            <select className={styles.langSelect} value={lang} onChange={(e) => setLang(e.target.value as any)}>
-              <option value="tj">TJ</option>
-              <option value="ru">RU</option>
-              <option value="en">EN</option>
-            </select>
           </div>
-        </header>
-        <div className={styles.content}>
-          {children}
+          <nav className={styles.nav}>
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`${styles.navItem} ${isActive(item.href) ? styles.navActive : ""}`}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={item.icon}/></svg>
+                <span>{t(`site.${item.label}`)}</span>
+              </Link>
+            ))}
+          </nav>
+          <div className={styles.sidebarFoot}>
+            <span className={styles.userName}>{user?.name}</span>
+            <button className={styles.logoutBtn} onClick={handleLogout}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              <span>{t("site.logout")}</span>
+            </button>
+          </div>
+        </aside>
+
+        {sidebarOpen && <div className={styles.overlay} onClick={() => setSidebarOpen(false)} />}
+
+        <div className={styles.main}>
+          <header className={styles.topbar}>
+            <button className={styles.menuBtn} onClick={() => setSidebarOpen(true)}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div className={styles.topbarRight}>
+              <select className={styles.langSelect} value={lang} onChange={(e) => setLang(e.target.value as any)}>
+                <option value="tj">TJ</option>
+                <option value="ru">RU</option>
+                <option value="en">EN</option>
+              </select>
+            </div>
+          </header>
+          <div className={styles.content}>
+            {children}
+          </div>
         </div>
       </div>
-    </div>
+    </SSEContext.Provider>
   );
 }
