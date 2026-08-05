@@ -11,6 +11,7 @@ import (
 
 	"nexara.food/internal/config"
 	"nexara.food/internal/handler"
+	"nexara.food/internal/notify"
 	"nexara.food/internal/pkg/middleware"
 	"nexara.food/internal/repository"
 	"nexara.food/internal/service"
@@ -48,6 +49,7 @@ func NewRouter(pool *pgxpool.Pool, cfg config.Config) http.Handler {
 
 	sseHub := sse.NewHub()
 	orderSvc.SetSSEHub(sseHub)
+	orderSvc.SetTelegram(notify.NewTelegram(cfg.TelegramBotToken, cfg.TelegramChatID))
 
 	healthH := handler.NewHealthHandler()
 	authH := handler.NewAuthHandler(authSvc)

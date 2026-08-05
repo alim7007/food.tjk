@@ -33,6 +33,8 @@ services:
       JWT_REFRESH_EXPIRY_DAYS: "${JWT_REFRESH_EXPIRY_DAYS:-7}"
       BCRYPT_COST: "${BCRYPT_COST:-12}"
       TZ: Asia/Dushanbe
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
     volumes:
       - ./uploads:/app/uploads
     depends_on:

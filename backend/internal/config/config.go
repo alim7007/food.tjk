@@ -16,6 +16,8 @@ type Config struct {
 	JWTExpiryMinutes     int    `env:"JWT_EXPIRY_MINUTES" envDefault:"60"`
 	JWTRefreshExpiryDays int    `env:"JWT_REFRESH_EXPIRY_DAYS" envDefault:"7"`
 	BcryptCost           int    `env:"BCRYPT_COST" envDefault:"12"`
+	TelegramBotToken     string `env:"TELEGRAM_BOT_TOKEN"`
+	TelegramChatID       string `env:"TELEGRAM_CHAT_ID"`
 }
 
 func (c Config) AllowedOriginList() []string {

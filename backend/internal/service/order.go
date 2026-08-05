@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"nexara.food/internal/model"
+	"nexara.food/internal/notify"
 	"nexara.food/internal/repository"
 	"nexara.food/internal/sse"
 )
@@ -17,6 +18,7 @@ type OrderService struct {
 	userRepo    repository.UserRepository
 	courierRepo repository.CourierRepository
 	sseHub      *sse.Hub
+	telegram    *notify.Telegram
 }
 
 func NewOrderService(orderRepo repository.OrderRepository, foodRepo repository.FoodRepository, userRepo repository.UserRepository, courierRepo repository.CourierRepository) *OrderService {
@@ -25,6 +27,10 @@ func NewOrderService(orderRepo repository.OrderRepository, foodRepo repository.F
 
 func (s *OrderService) SetSSEHub(hub *sse.Hub) {
 	s.sseHub = hub
+}
+
+func (s *OrderService) SetTelegram(tg *notify.Telegram) {
+	s.telegram = tg
 }
 
 type CreateOrderInput struct {
@@ -122,6 +128,10 @@ func (s *OrderService) Create(ctx context.Context, input CreateOrderInput) (*mod
 			OrderID: order.ID.String(),
 			Total:   fmt.Sprintf("%.0f", order.Total),
 		})
+	}
+
+	if s.telegram != nil {
+		go s.telegram.SendNewOrder(order.ID.String(), fmt.Sprintf("%.0f", order.Total))
 	}
 
 	return order, nil
