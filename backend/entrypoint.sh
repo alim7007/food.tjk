@@ -1,6 +1,4 @@
 #!/bin/sh
-if [ ! -f /app/uploads/shawarma_main.png ]; then
-    echo "Copying seed images to uploads volume..."
-    cp -r /app/uploads-seed/* /app/uploads/
-fi
+echo "Ensuring seed images are in uploads volume..."
+cp -n /app/uploads-seed/* /app/uploads/ 2>/dev/null || true
 exec /app/api

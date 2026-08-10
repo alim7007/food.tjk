@@ -39,17 +39,23 @@ func NewRouter(pool *pgxpool.Pool, cfg config.Config) http.Handler {
 	foodRepo := repository.NewFoodRepo(pool)
 	orderRepo := repository.NewOrderRepo(pool)
 	courierRepo := repository.NewCourierRepo(pool)
+	telegramSubRepo := repository.NewTelegramSubscriberRepo(pool)
 
 	authSvc := service.NewAuthService(userRepo, courierRepo, cfg)
 	restaurantSvc := service.NewRestaurantService(restaurantRepo)
 	categorySvc := service.NewCategoryService(categoryRepo)
 	foodSvc := service.NewFoodService(foodRepo)
 	orderSvc := service.NewOrderService(orderRepo, foodRepo, userRepo, courierRepo)
+	orderSvc.SetTelegramRepo(telegramSubRepo)
 	courierSvc := service.NewCourierService(courierRepo)
 
 	sseHub := sse.NewHub()
+	courierHub := sse.NewCourierHub()
 	orderSvc.SetSSEHub(sseHub)
-	orderSvc.SetTelegram(notify.NewTelegram(cfg.TelegramBotToken, cfg.TelegramChatID))
+	orderSvc.SetCourierHub(courierHub)
+	orderSvc.SetTelegram(notify.NewTelegram(cfg.TelegramBotToken))
+	orderSvc.SetTelegramChatID(cfg.TelegramChatID)
+	orderSvc.SetFrontendURL(cfg.FrontendURL)
 
 	healthH := handler.NewHealthHandler()
 	authH := handler.NewAuthHandler(authSvc)
@@ -60,8 +66,12 @@ func NewRouter(pool *pgxpool.Pool, cfg config.Config) http.Handler {
 	courierH := handler.NewCourierHandler(courierSvc)
 	uploadH := handler.NewUploadHandler()
 	sseH := handler.NewSSEHandler(sseHub)
+	sseH.SetCourierHub(courierHub)
+	telegramWebhookH := handler.NewTelegramWebhookHandler(telegramSubRepo)
 
 	r.Get("/uploads/*", uploadH.ServeUpload)
+
+	r.Post("/api/v1/telegram/webhook", telegramWebhookH.Handle)
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/health", healthH.Health)
@@ -70,6 +80,7 @@ func NewRouter(pool *pgxpool.Pool, cfg config.Config) http.Handler {
 		r.Get("/restaurants/{id}", restaurantH.GetByID)
 		r.Get("/restaurants/{id}/foods", foodH.ListByRestaurant)
 		r.Get("/categories", categoryH.List)
+		r.Get("/couriers", courierH.ListAll)
 
 		r.Post("/auth/register", authH.Register)
 		r.Post("/auth/login", authH.Login)
@@ -122,6 +133,13 @@ func NewRouter(pool *pgxpool.Pool, cfg config.Config) http.Handler {
 			r.Use(middleware.RequireRole("courier"))
 
 			r.Get("/courier/orders", orderH.ListCourierOrders)
+		})
+
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.RequireAuth(cfg.JWTSecret))
+			r.Use(middleware.RequireRole("courier"))
+
+			r.Get("/courier/orders/events", sseH.CourierEvents)
 		})
 	})
 

@@ -1,0 +1,8 @@
+.shell { min-height: 100vh; background: var(--color-bg); }
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: var(--color-surface); border-bottom: 1px solid var(--color-border); }
+.brand { font-weight: 800; font-size: 16px; color: var(--color-primary); }
+.topbarRight { display: flex; align-items: center; gap: 12px; }
+.userName { font-size: 13px; color: var(--color-text-secondary); }
+.langSelect { background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-text); padding: 4px 8px; border-radius: 6px; font-size: 12px; }
+.logoutBtn { background: none; border: 1px solid var(--color-border); color: var(--color-text-secondary); padding: 4px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+.content { max-width: 600px; margin: 0 auto; padding: 0 16px; }

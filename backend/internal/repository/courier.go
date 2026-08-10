@@ -11,6 +11,7 @@ import (
 
 type CourierRepository interface {
 	Create(ctx context.Context, userID, name, phone string) (*model.Courier, error)
+	GetByID(ctx context.Context, id string) (*model.Courier, error)
 	GetByUserID(ctx context.Context, userID string) (*model.Courier, error)
 	ListAll(ctx context.Context) ([]model.Courier, error)
 }
@@ -44,6 +45,18 @@ func (r *CourierRepo) GetByUserID(ctx context.Context, userID string) (*model.Co
 	).Scan(&c.ID, &c.UserID, &c.Name, &c.Phone, &c.IsActive, &c.CreatedAt, &c.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("get courier by user id: %w", err)
+	}
+	return &c, nil
+}
+
+func (r *CourierRepo) GetByID(ctx context.Context, id string) (*model.Courier, error) {
+	var c model.Courier
+	err := r.pool.QueryRow(ctx,
+		`SELECT id, user_id, name, phone, is_active, created_at, updated_at FROM couriers WHERE id = $1`,
+		id,
+	).Scan(&c.ID, &c.UserID, &c.Name, &c.Phone, &c.IsActive, &c.CreatedAt, &c.UpdatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("get courier by id: %w", err)
 	}
 	return &c, nil
 }

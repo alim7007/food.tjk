@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/google/uuid"
 
@@ -13,12 +14,16 @@ import (
 )
 
 type OrderService struct {
-	orderRepo   repository.OrderRepository
-	foodRepo    repository.FoodRepository
-	userRepo    repository.UserRepository
-	courierRepo repository.CourierRepository
-	sseHub      *sse.Hub
-	telegram    *notify.Telegram
+	orderRepo      repository.OrderRepository
+	foodRepo       repository.FoodRepository
+	userRepo       repository.UserRepository
+	courierRepo    repository.CourierRepository
+	sseHub         *sse.Hub
+	courierHub     *sse.CourierHub
+	telegram       *notify.Telegram
+	telegramRepo   repository.TelegramSubscriberRepository
+	telegramChatID string
+	frontendURL    string
 }
 
 func NewOrderService(orderRepo repository.OrderRepository, foodRepo repository.FoodRepository, userRepo repository.UserRepository, courierRepo repository.CourierRepository) *OrderService {
@@ -29,8 +34,24 @@ func (s *OrderService) SetSSEHub(hub *sse.Hub) {
 	s.sseHub = hub
 }
 
+func (s *OrderService) SetCourierHub(hub *sse.CourierHub) {
+	s.courierHub = hub
+}
+
 func (s *OrderService) SetTelegram(tg *notify.Telegram) {
 	s.telegram = tg
+}
+
+func (s *OrderService) SetTelegramRepo(repo repository.TelegramSubscriberRepository) {
+	s.telegramRepo = repo
+}
+
+func (s *OrderService) SetTelegramChatID(chatID string) {
+	s.telegramChatID = chatID
+}
+
+func (s *OrderService) SetFrontendURL(url string) {
+	s.frontendURL = url
 }
 
 type CreateOrderInput struct {
@@ -131,7 +152,42 @@ func (s *OrderService) Create(ctx context.Context, input CreateOrderInput) (*mod
 	}
 
 	if s.telegram != nil {
-		go s.telegram.SendNewOrder(order.ID.String(), fmt.Sprintf("%.0f", order.Total))
+		go func() {
+			var chatIDs []int64
+
+			if s.telegramRepo != nil {
+				subs, err := s.telegramRepo.ListAll(context.Background())
+				if err == nil {
+					for _, sub := range subs {
+						chatIDs = append(chatIDs, sub.ChatID)
+					}
+				}
+			}
+
+			if len(chatIDs) == 0 && s.telegramChatID != "" {
+				id, err := strconv.ParseInt(s.telegramChatID, 10, 64)
+				if err == nil {
+					chatIDs = append(chatIDs, id)
+				}
+			}
+
+			if len(chatIDs) > 0 {
+				itemsStr := ""
+				for _, item := range orderItems {
+					itemsStr += fmt.Sprintf("  • %s x%d — %.0f TJS\n", item.FoodName, item.Quantity, item.TotalPrice)
+				}
+				noteStr := ""
+				if input.Note != nil {
+					noteStr = *input.Note
+				}
+				adminURL := s.frontendURL
+				if adminURL == "" {
+					adminURL = "http://localhost:3000"
+				}
+				s.telegram.SendNewOrder(chatIDs, order.ID.String(), fmt.Sprintf("%.0f", order.Total),
+					itemsStr, input.DeliveryAddress, input.DeliveryPhone, noteStr, adminURL)
+			}
+		}()
 	}
 
 	return order, nil
@@ -196,7 +252,27 @@ func (s *OrderService) UpdateStatus(ctx context.Context, id string, newStatus st
 }
 
 func (s *OrderService) AssignCourier(ctx context.Context, orderID string, courierID uuid.UUID) error {
-	return s.orderRepo.AssignCourier(ctx, orderID, courierID)
+	if err := s.orderRepo.AssignCourier(ctx, orderID, courierID); err != nil {
+		return err
+	}
+
+	if s.courierHub != nil {
+		courier, err := s.courierRepo.GetByID(ctx, courierID.String())
+		if err == nil {
+			order, err := s.orderRepo.GetByID(ctx, orderID)
+			if err == nil {
+				s.courierHub.SendToCourier(courier.UserID.String(), sse.Event{
+					Type:         "order_assigned",
+					OrderID:      orderID,
+					Restaurant:   order.RestaurantName,
+					CustomerName: order.CustomerName,
+					Total:        fmt.Sprintf("%.0f", order.Total),
+				})
+			}
+		}
+	}
+
+	return nil
 }
 
 func (s *OrderService) ListByCourier(ctx context.Context, userID string, status string, page, limit int) ([]model.Order, int, error) {

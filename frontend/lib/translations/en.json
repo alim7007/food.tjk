@@ -122,6 +122,8 @@
     "inactive": "Inactive",
     "userId": "User ID",
     "courierNotice": "Courier must first register as a user. Enter the user ID.",
-    "noProfileData": "You haven't added your address and phone yet"
+    "noProfileData": "You haven't added your address and phone yet",
+    "selectCourier": "Select Courier",
+    "selectCourierDesc": "Who are you? Select yourself from the list to receive orders."
   }
 }

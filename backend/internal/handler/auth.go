@@ -174,7 +174,7 @@ func setAuthCookie(w http.ResponseWriter, token string) {
 		Name:     "access_token",
 		Value:    token,
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 		Path:     "/",
 		MaxAge:   3600,

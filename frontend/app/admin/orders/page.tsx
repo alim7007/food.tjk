@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { fetchAllOrders } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
+import { useSSEVersion } from "@/components/admin/AdminLayout";
 import type { Order } from "@/lib/types";
 import styles from "./page.module.css";
 
@@ -11,6 +12,7 @@ const STATUSES = ["", "pending", "accepted", "delivered", "cancelled"];
 
 export default function AdminOrdersPage() {
   const { t } = useI18n();
+  const sseVersion = useSSEVersion();
   const [orders, setOrders] = useState<Order[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,7 @@ export default function AdminOrdersPage() {
       .then((res) => { setOrders(res.orders); setTotal(res.total); })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [status, page]);
+  }, [status, page, sseVersion]);
 
   const totalPages = Math.ceil(total / limit);
 

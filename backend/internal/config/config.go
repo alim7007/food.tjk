@@ -18,6 +18,8 @@ type Config struct {
 	BcryptCost           int    `env:"BCRYPT_COST" envDefault:"12"`
 	TelegramBotToken     string `env:"TELEGRAM_BOT_TOKEN"`
 	TelegramChatID       string `env:"TELEGRAM_CHAT_ID"`
+	TelegramWebhookURL   string `env:"TELEGRAM_WEBHOOK_URL"`
+	FrontendURL          string `env:"FRONTEND_URL" envDefault:"http://localhost:3000"`
 }
 
 func (c Config) AllowedOriginList() []string {

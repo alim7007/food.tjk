@@ -177,6 +177,10 @@ export async function fetchCouriers(): Promise<Courier[]> {
   return request("/admin/couriers");
 }
 
+export async function fetchPublicCouriers(): Promise<Courier[]> {
+  return request("/couriers");
+}
+
 export async function createCourier(data: { user_id: string; name: string; phone: string }): Promise<Courier> {
   return request("/admin/couriers", { method: "POST", body: JSON.stringify(data) });
 }

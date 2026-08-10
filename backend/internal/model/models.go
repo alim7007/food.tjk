@@ -111,6 +111,14 @@ type OrderItem struct {
 
 var ValidOrderStatuses = []string{"pending", "accepted", "delivered", "cancelled"}
 
+type TelegramSubscriber struct {
+	ID           int64     `json:"id"`
+	ChatID       int64     `json:"chat_id"`
+	Username     *string   `json:"username"`
+	FirstName    *string   `json:"first_name"`
+	SubscribedAt time.Time `json:"subscribed_at"`
+}
+
 var AllowedTransitions = map[string][]string{
 	"pending":   {"accepted", "cancelled"},
 	"accepted":  {"delivered", "cancelled"},

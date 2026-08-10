@@ -10,6 +10,7 @@ import (
 
 	"nexara.food/internal/config"
 	"nexara.food/internal/database"
+	"nexara.food/internal/notify"
 	"nexara.food/internal/server"
 )
 
@@ -35,8 +36,16 @@ func main() {
 
 	slog.Info("database connected")
 
+	if cfg.TelegramBotToken != "" && cfg.TelegramWebhookURL != "" {
+		tg := notify.NewTelegram(cfg.TelegramBotToken)
+		if err := tg.SetWebhook(cfg.TelegramWebhookURL); err != nil {
+			slog.Error("failed to set telegram webhook", "error", err)
+		} else {
+			slog.Info("telegram webhook registered")
+		}
+	}
+
 	readTimeout, _ := time.ParseDuration(cfg.ReadTimeout)
-	writeTimeout, _ := time.ParseDuration(cfg.WriteTimeout)
 
 	router := server.NewRouter(pool, cfg)
 
@@ -44,7 +53,7 @@ func main() {
 		Addr:         fmt.Sprintf(":%s", cfg.ServerPort),
 		Handler:      router,
 		ReadTimeout:  readTimeout,
-		WriteTimeout: writeTimeout,
+		WriteTimeout: 0,
 	}
 
 	slog.Info("server starting", "port", cfg.ServerPort)

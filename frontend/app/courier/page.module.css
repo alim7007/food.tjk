@@ -1,0 +1,11 @@
+.page { padding: 48px 0; }
+.title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+.subtitle { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 24px; }
+.list { display: flex; flex-direction: column; gap: 10px; }
+.card { display: flex; align-items: center; gap: 12px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 16px; cursor: pointer; text-align: left; color: var(--color-text); font-size: 14px; transition: border-color 0.15s; }
+.card:hover { border-color: var(--color-primary); }
+.name { font-weight: 700; flex: 1; }
+.phone { color: var(--color-text-secondary); font-size: 13px; }
+.arrow { color: var(--color-primary); font-size: 18px; }
+.loading { text-align: center; padding: 48px; color: var(--color-text-muted); }
+.empty { text-align: center; padding: 48px; color: var(--color-text-muted); }

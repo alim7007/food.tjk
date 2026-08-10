@@ -31,6 +31,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sseVersion, setSSEVersion] = useState(0);
   const esRef = useRef<EventSource | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio("/notification.mp3");
+    audioRef.current.volume = 0.5;
+  }, []);
 
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
@@ -44,6 +50,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         if (data.type === "new_order") {
           toast(`Новый заказ #${data.order_id.slice(0, 8)}`, "info");
           setSSEVersion((v) => v + 1);
+          if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(() => {});
+          }
         }
       } catch {}
     };
