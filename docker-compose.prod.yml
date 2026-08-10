@@ -36,6 +36,7 @@ services:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
       TELEGRAM_WEBHOOK_URL: ${TELEGRAM_WEBHOOK_URL}
+      FRONTEND_URL: ${DOMAIN:-http://localhost}
     volumes:
       - ./uploads:/app/uploads
     depends_on:
