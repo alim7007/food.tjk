@@ -14,7 +14,7 @@ export default function CourierHomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCouriers()
+    fetchPublicCouriers()
       .then(setCouriers)
       .catch(() => {})
       .finally(() => setLoading(false));
