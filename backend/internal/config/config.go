@@ -20,6 +20,7 @@ type Config struct {
 	TelegramChatID       string `env:"TELEGRAM_CHAT_ID"`
 	TelegramWebhookURL   string `env:"TELEGRAM_WEBHOOK_URL"`
 	FrontendURL          string `env:"FRONTEND_URL" envDefault:"http://localhost:3000"`
+	SecureCookie         bool   `env:"SECURE_COOKIE" envDefault:"false"`
 }
 
 func (c Config) AllowedOriginList() []string {

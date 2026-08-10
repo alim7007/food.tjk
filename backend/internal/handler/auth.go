@@ -14,12 +14,13 @@ import (
 )
 
 type AuthHandler struct {
-	svc      *service.AuthService
-	validate *validator.Validate
+	svc          *service.AuthService
+	validate     *validator.Validate
+	secureCookie bool
 }
 
-func NewAuthHandler(svc *service.AuthService) *AuthHandler {
-	return &AuthHandler{svc: svc, validate: NewValidator()}
+func NewAuthHandler(svc *service.AuthService, secureCookie bool) *AuthHandler {
+	return &AuthHandler{svc: svc, validate: NewValidator(), secureCookie: secureCookie}
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +69,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	setAuthCookie(w, tokens.AccessToken)
+	h.setAuthCookie(w, tokens.AccessToken)
 
 	writeJSON(w, http.StatusCreated, dto.RegisterResponse{
 		UserID:       user.ID.String(),
@@ -110,7 +111,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	setAuthCookie(w, tokens.AccessToken)
+	h.setAuthCookie(w, tokens.AccessToken)
 
 	writeJSON(w, http.StatusOK, dto.LoginResponse{
 		UserID:       user.ID.String(),
@@ -140,7 +141,7 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	setAuthCookie(w, tokens.AccessToken)
+	h.setAuthCookie(w, tokens.AccessToken)
 
 	writeJSON(w, http.StatusOK, dto.RefreshResponse{
 		AccessToken:  tokens.AccessToken,
@@ -169,12 +170,12 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"message": "logged out"})
 }
 
-func setAuthCookie(w http.ResponseWriter, token string) {
+func (h *AuthHandler) setAuthCookie(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "access_token",
 		Value:    token,
 		HttpOnly: true,
-		Secure:   false,
+		Secure:   h.secureCookie,
 		SameSite: http.SameSiteLaxMode,
 		Path:     "/",
 		MaxAge:   3600,

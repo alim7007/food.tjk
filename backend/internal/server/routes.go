@@ -58,7 +58,7 @@ func NewRouter(pool *pgxpool.Pool, cfg config.Config) http.Handler {
 	orderSvc.SetFrontendURL(cfg.FrontendURL)
 
 	healthH := handler.NewHealthHandler()
-	authH := handler.NewAuthHandler(authSvc)
+	authH := handler.NewAuthHandler(authSvc, cfg.SecureCookie)
 	restaurantH := handler.NewRestaurantHandler(restaurantSvc)
 	categoryH := handler.NewCategoryHandler(categorySvc)
 	foodH := handler.NewFoodHandler(foodSvc)
