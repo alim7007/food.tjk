@@ -21,33 +21,31 @@ export default function CourierLayout({ children }: { children: React.ReactNode 
   const [sseVersion, setSSEVersion] = useState(0);
   const esRef = useRef<EventSource | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
+  const audioUnlocked = useRef(false);
 
   useEffect(() => {
     audioRef.current = new Audio("/notification.mp3");
     audioRef.current.volume = 0.5;
   }, []);
 
-  const playSound = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => {});
-    }
-    try {
-      if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
-      const ctx = audioCtxRef.current;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.setValueAtTime(800, ctx.currentTime);
-      osc.frequency.setValueAtTime(1000, ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.3);
-    } catch {}
-  };
+  useEffect(() => {
+    const unlock = () => {
+      if (audioUnlocked.current || !audioRef.current) return;
+      audioRef.current.volume = 0;
+      audioRef.current.play().then(() => {
+        audioRef.current!.pause();
+        audioRef.current!.currentTime = 0;
+        audioRef.current!.volume = 0.5;
+        audioUnlocked.current = true;
+      }).catch(() => {});
+    };
+    document.addEventListener("click", unlock, { once: true });
+    document.addEventListener("touchstart", unlock, { once: true });
+    return () => {
+      document.removeEventListener("click", unlock);
+      document.removeEventListener("touchstart", unlock);
+    };
+  }, []);
 
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
@@ -61,7 +59,10 @@ export default function CourierLayout({ children }: { children: React.ReactNode 
         if (data.type === "order_assigned") {
           toast(`Новый заказ: ${data.restaurant} — ${data.total} TJS`, "info");
           setSSEVersion((v) => v + 1);
-          playSound();
+          if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(() => {});
+          }
         }
       } catch {}
     };
